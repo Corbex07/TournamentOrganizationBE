@@ -3,7 +3,7 @@ package nl.fontys.tournamentorganization.models;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "tournament")
+@Table(name = "users")
 public class Users {
 
     @Id

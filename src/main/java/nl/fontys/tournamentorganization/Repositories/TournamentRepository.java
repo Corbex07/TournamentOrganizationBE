@@ -1,6 +1,7 @@
 package nl.fontys.tournamentorganization.Repositories;
 
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import nl.fontys.tournamentorganization.DTOs.TournamentDTO;
 import nl.fontys.tournamentorganization.interfaces.ITournamentRepository;
 import nl.fontys.tournamentorganization.models.Tournament;
@@ -25,15 +26,26 @@ public class TournamentRepository implements ITournamentRepository {
                 .getResultList();
     }
 
+    @Override
     public Optional<Tournament> getTournamentById(Long id) {
-        return Optional.empty();
+        Tournament tournament = entityManager.find(Tournament.class, id);
+
+        return Optional.ofNullable(tournament);
     }
 
+    @Override
+    @Transactional
     public Tournament saveTournament(Tournament tournament) {
-        return null;
+        return entityManager.merge(tournament);
     }
 
+    @Override
+    @Transactional
     public void deleteTournament(Long id) {
+        Tournament tournament = entityManager.find(Tournament.class, id);
 
+        if (tournament != null) {
+            entityManager.remove(tournament);
+        }
     }
 }
