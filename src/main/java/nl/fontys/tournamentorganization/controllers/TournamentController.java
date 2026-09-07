@@ -39,7 +39,7 @@ public class TournamentController {
                 );
     }
 
-    @DeleteMapping("/employees/{id}")
+    @DeleteMapping("/tournament/{id}")
     void deleteEmployee(@PathVariable Long id) {
         tournamentRepository.deleteTournament(id);
     }
