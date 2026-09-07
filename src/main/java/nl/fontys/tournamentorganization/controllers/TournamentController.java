@@ -1,10 +1,10 @@
 package nl.fontys.tournamentorganization.controllers;
 
-import nl.fontys.tournamentorganization.Repositories.TournamentRepository;
+import nl.fontys.tournamentorganization.DTOs.TournamentDTO;
 import nl.fontys.tournamentorganization.models.Tournament;
+import nl.fontys.tournamentorganization.services.TournamentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -12,35 +12,39 @@ import java.util.List;
 @RequestMapping("/api/tournaments")
 public class TournamentController {
 
-    private final TournamentRepository tournamentRepository;
+    private final TournamentService tournamentService;
 
-    public TournamentController(TournamentRepository tournamentRepository) {
-        this.tournamentRepository = tournamentRepository;
-    }
-    @GetMapping("/tournaments")
-    List<Tournament> all() {
-        return tournamentRepository.getAllTournaments();
+    public TournamentController(TournamentService tournamentService) {
+        this.tournamentService = tournamentService;
     }
 
-    @PostMapping("/tournaments/{id}")
-    Tournament newTournament(@RequestBody Tournament newTournament) {
-        return tournamentRepository.saveTournament(newTournament);
+    @GetMapping
+    public List<Tournament> all() {
+        return tournamentService.getAllTournaments();
     }
 
-    @GetMapping("/tournaments/{id}")
-    Tournament one(@PathVariable Long id) {
-
-        return tournamentRepository.getTournamentById(id)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Tournament not found"
-                    )
-                );
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createTournament(@RequestBody TournamentDTO tournamentDTO) {
+        tournamentService.saveTournament(tournamentDTO);
     }
 
-    @DeleteMapping("/tournament/{id}")
-    void deleteEmployee(@PathVariable Long id) {
-        tournamentRepository.deleteTournament(id);
+    @GetMapping("/{id}")
+    public void getTournamentById (@PathVariable Long id) {
+        tournamentService.getTournamentById(id);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTournament(@PathVariable Long id) {
+        tournamentService.deleteTournament(id);
+    }
+
+    @PutMapping("/{id}")
+    public void updateTournament(
+            @PathVariable Long id,
+            @RequestBody TournamentDTO tournamentDTO) {
+
+        tournamentService.updateTournament(id, tournamentDTO);
     }
 }

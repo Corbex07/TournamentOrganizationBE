@@ -10,13 +10,13 @@ public class Tournament {
     private Long id;
 
     @Column(name = "name")
-    private String name;
+    public String name;
 
     @ManyToOne
     @JoinColumn(name = "organiser_id")
     private Users organiser;
 
     @Column(name = "max_capacity")
-    private Integer maxCapacity;
+    public Integer maxCapacity;
 }
 
