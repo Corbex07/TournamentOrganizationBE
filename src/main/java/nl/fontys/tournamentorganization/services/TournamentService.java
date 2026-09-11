@@ -4,24 +4,26 @@ import nl.fontys.tournamentorganization.DTOs.TournamentDTO;
 import nl.fontys.tournamentorganization.interfaces.ITournamentRepository;
 import nl.fontys.tournamentorganization.models.Tournament;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+@Service
+public class TournamentService {
 
-    public class TournamentService {
+    private final ITournamentRepository tournamentRepository;
 
-        private final ITournamentRepository tournamentRepository;
+    public TournamentService(ITournamentRepository tournamentRepository) {
+        this.tournamentRepository = tournamentRepository;
+    }
 
-        public TournamentService(ITournamentRepository tournamentRepository) {
-            this.tournamentRepository = tournamentRepository;
-        }
+    public List<Tournament> getAllTournaments() {
 
-        public List<Tournament> getAllTournaments() {
-            return tournamentRepository.findAll();
-        }
+        return tournamentRepository.findAll();
+    }
 
-        public Tournament getTournamentById(Long id) {
-            return tournamentRepository.findById(id)
+    public Tournament getTournamentById(Long id) {
+        return tournamentRepository.findById(id)
                     .orElseThrow(() ->
                             new ResponseStatusException(
                                     HttpStatus.NOT_FOUND,
@@ -31,6 +33,13 @@ import java.util.List;
         }
 
         public void saveTournament(TournamentDTO tournamentDTO) {
+            if (tournamentDTO.name == null || tournamentDTO.name.isBlank()) {
+                throw new IllegalArgumentException("Tournament name cannot be empty");
+            }
+
+            if (tournamentDTO.maxCapacity == null || tournamentDTO.maxCapacity <= 0) {
+                throw new IllegalArgumentException("Tournament capacity must be greater than 0");
+            }
             Tournament tournament = new Tournament();
             tournament.name = tournamentDTO.name;
             tournament.maxCapacity = tournamentDTO.maxCapacity;
@@ -38,6 +47,9 @@ import java.util.List;
         }
 
         public void deleteTournament(Long id) {
+            if (tournamentRepository.findById(id).isEmpty()) {
+                throw new IllegalArgumentException("Tournament does not exist");
+            }
             tournamentRepository.deleteById(id);
         }
 

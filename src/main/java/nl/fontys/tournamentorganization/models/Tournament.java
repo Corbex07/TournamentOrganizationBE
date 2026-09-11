@@ -18,5 +18,30 @@ public class Tournament {
 
     @Column(name = "max_capacity")
     public Integer maxCapacity;
+
+    public Tournament() {
+    }
+
+    public Tournament(String name, Users organiser, Integer maxCapacity) {
+        this.name = name;
+        this.organiser = organiser;
+        this.maxCapacity = maxCapacity;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Users getOrganiser() {
+        return organiser;
+    }
+
+    public Integer getMaxCapacity() {
+        return maxCapacity;
+    }
 }
 

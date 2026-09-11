@@ -15,6 +15,7 @@ public class TournamentController {
     private final TournamentService tournamentService;
 
     public TournamentController(TournamentService tournamentService) {
+
         this.tournamentService = tournamentService;
     }
 
