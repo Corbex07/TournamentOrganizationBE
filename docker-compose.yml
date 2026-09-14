@@ -1,0 +1,26 @@
+services:
+
+  database:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: tournament_organization_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Gonretblux2
+    ports:
+      - "5432:5432"
+    volumes:
+      - tournament-data:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/tournament_organization_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Gonretblux2
+    depends_on:
+      - database
+
+volumes:
+  tournament-data:
