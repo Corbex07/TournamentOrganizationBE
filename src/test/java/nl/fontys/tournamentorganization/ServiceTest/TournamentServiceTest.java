@@ -191,5 +191,10 @@ class TournamentServiceTest {
 
         verify(tournamentRepository).save(existingTournament);
     }
+
+    @Test
+    public void dummyTestFail() {
+        assertEquals(1,2);
+    }
 }
 

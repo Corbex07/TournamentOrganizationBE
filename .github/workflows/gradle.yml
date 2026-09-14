@@ -9,9 +9,9 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main","development" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main","development" ]
 
 jobs:
   build:
@@ -44,8 +44,11 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build and test
-        run: ./gradlew build
+      - name: Run unit tests
+        run: ./gradlew test
+
+      - name: Build
+        run: ./gradlew build -x test
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/testdb
           SPRING_DATASOURCE_USERNAME: test
