@@ -191,6 +191,6 @@ class TournamentServiceTest {
 
         verify(tournamentRepository).save(existingTournament);
     }
-    
+
 }
 
