@@ -2,7 +2,9 @@ package nl.fontys.tournamentorganization.services;
 
 import nl.fontys.tournamentorganization.DTOs.TournamentDTO;
 import nl.fontys.tournamentorganization.interfaces.ITournamentRepository;
+import nl.fontys.tournamentorganization.interfaces.IUserRepository;
 import nl.fontys.tournamentorganization.models.Tournament;
+import nl.fontys.tournamentorganization.models.Users;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -12,9 +14,11 @@ import java.util.List;
 public class TournamentService {
 
     private final ITournamentRepository tournamentRepository;
+    private final IUserRepository userRepository;
 
-    public TournamentService(ITournamentRepository tournamentRepository) {
+    public TournamentService(ITournamentRepository tournamentRepository, IUserRepository userRepository) {
         this.tournamentRepository = tournamentRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Tournament> getAllTournaments() {
@@ -40,9 +44,17 @@ public class TournamentService {
             if (tournamentDTO.maxCapacity == null || tournamentDTO.maxCapacity <= 0) {
                 throw new IllegalArgumentException("Tournament capacity must be greater than 0");
             }
+
+            // Temporary: simulate user with ID 1 being logged in
+            Users organiser = userRepository.findById(5L)
+                    .orElseThrow(() -> new IllegalArgumentException("Organiser not found"));
+
             Tournament tournament = new Tournament();
             tournament.name = tournamentDTO.name;
             tournament.maxCapacity = tournamentDTO.maxCapacity;
+            tournament.setOrganiser(organiser);
+
+
             tournamentRepository.save(tournament);
         }
 

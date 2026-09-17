@@ -43,5 +43,9 @@ public class Tournament {
     public Integer getMaxCapacity() {
         return maxCapacity;
     }
+
+    public void setOrganiser(Users organiser) {
+        this.organiser = organiser;
+    }
 }
 
