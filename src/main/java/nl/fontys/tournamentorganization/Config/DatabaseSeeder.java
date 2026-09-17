@@ -9,6 +9,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 public class DatabaseSeeder implements CommandLineRunner {
 
@@ -54,13 +56,19 @@ public class DatabaseSeeder implements CommandLineRunner {
         Tournament tournament1 = new Tournament(
                 "Fontys Valorant Cup",
                 organiser1,
-                8
+                8,
+                LocalDateTime.of(2027, 9, 19, 18, 0),
+                LocalDateTime.of(2027, 9, 20, 18, 0),
+                24
         );
 
         Tournament tournament2 = new Tournament(
                 "Weekend Tournament",
                 organiser2,
-                16
+                16,
+                LocalDateTime.of(2027, 9, 25, 18, 0),
+                LocalDateTime.of(2027, 9, 26, 18, 0),
+                48
         );
 
         tournamentRepository.save(tournament1);

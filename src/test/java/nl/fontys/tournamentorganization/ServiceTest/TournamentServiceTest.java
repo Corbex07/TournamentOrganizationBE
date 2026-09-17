@@ -2,7 +2,9 @@ package nl.fontys.tournamentorganization.ServiceTest;
 
 import nl.fontys.tournamentorganization.DTOs.TournamentDTO;
 import nl.fontys.tournamentorganization.interfaces.ITournamentRepository;
+import nl.fontys.tournamentorganization.interfaces.IUserRepository;
 import nl.fontys.tournamentorganization.models.Tournament;
+import nl.fontys.tournamentorganization.models.Users;
 import nl.fontys.tournamentorganization.services.TournamentService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,14 +31,36 @@ class TournamentServiceTest {
     @Mock
     private ITournamentRepository tournamentRepository;
 
+    @Mock
+    private IUserRepository userRepository;
+
     @InjectMocks
     private TournamentService tournamentService;
 
+    private TournamentDTO createValidTournamentDTO() {
+        TournamentDTO dto = new TournamentDTO();
+
+        dto.name = "Fontys Valorant Cup";
+        dto.maxCapacity = 8;
+        dto.registrationDeadline =
+                LocalDateTime.of(2027, 9, 20, 18, 0);
+        dto.startDate =
+                LocalDateTime.of(2027, 9, 21, 18, 0);
+        dto.roundDurationHours = 48;
+
+        return dto;
+    }
+
+// saveTournament ----------------------------------------------------------------------------------------------------
+
     @Test
     void saveTournament_shouldSaveTournamentWithCorrectValues() {
-        TournamentDTO tournamentDTO = new TournamentDTO();
-        tournamentDTO.name = "Valorant Cup";
-        tournamentDTO.maxCapacity = 16;
+        TournamentDTO tournamentDTO = createValidTournamentDTO();
+
+        Users organiser = mock(Users.class);
+
+        when(userRepository.findById(5L))
+                .thenReturn(Optional.of(organiser));
 
         tournamentService.saveTournament(tournamentDTO);
 
@@ -46,13 +71,29 @@ class TournamentServiceTest {
 
         Tournament savedTournament = captor.getValue();
 
-        assertEquals("Valorant Cup", savedTournament.name);
-        assertEquals(16, savedTournament.maxCapacity);
+        assertEquals("Fontys Valorant Cup", savedTournament.getName());
+        assertEquals(8, savedTournament.getMaxCapacity());
+        assertEquals(
+                tournamentDTO.registrationDeadline,
+                savedTournament.getRegistrationDeadline()
+        );
+        assertEquals(
+                tournamentDTO.startDate,
+                savedTournament.getStartDate()
+        );
+        assertEquals(
+                48,
+                savedTournament.getRoundDurationHours()
+        );
+        assertEquals(
+                organiser,
+                savedTournament.getOrganiser()
+        );
     }
     @Test
     void saveTournament_shouldThrowException_whenCapacityIsNegative() {
-        TournamentDTO tournamentDTO = new TournamentDTO();
-        tournamentDTO.name = "Valorant Cup";
+        TournamentDTO tournamentDTO = createValidTournamentDTO();
+
         tournamentDTO.maxCapacity = -5;
 
         assertThrows(
@@ -65,12 +106,10 @@ class TournamentServiceTest {
     }
     @Test
     void saveTournament_shouldThrowException_whenNameIsNull() {
-        // Arrange
-        TournamentDTO tournamentDTO = new TournamentDTO();
-        tournamentDTO.name = null;
-        tournamentDTO.maxCapacity = 16;
+        TournamentDTO tournamentDTO = createValidTournamentDTO();
 
-        // Act + Assert
+        tournamentDTO.name = null;
+
         assertThrows(
                 IllegalArgumentException.class,
                 () -> tournamentService.saveTournament(tournamentDTO)
@@ -79,11 +118,59 @@ class TournamentServiceTest {
         verify(tournamentRepository, never())
                 .save(any(Tournament.class));
     }
+
+    @Test
+    void saveTournament_shouldThrowException_whenStartDateIsNull() {
+        TournamentDTO dto = createValidTournamentDTO();
+
+        dto.startDate = null;
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> tournamentService.saveTournament(dto)
+        );
+
+        verify(tournamentRepository, never())
+                .save(any(Tournament.class));
+    }
+
+    @Test
+    void saveTournament_shouldThrowException_whenRegistrationDeadlineIsAfterStartDate() {
+        TournamentDTO dto = createValidTournamentDTO();
+
+        dto.registrationDeadline =
+                LocalDateTime.of(2027, 9, 22, 18, 0);
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> tournamentService.saveTournament(dto)
+        );
+
+        verify(tournamentRepository, never())
+                .save(any(Tournament.class));
+    }
+
+    // getAllTournament  ----------------------------------------------------------------------------------------------------
+
     @Test
     void getAllTournaments_shouldReturnAllTournaments() {
         // arrange
-        Tournament tournament1 = new Tournament("Tournament 1", null, 8);
-        Tournament tournament2 = new Tournament("Tournament 2", null, 16);
+        Tournament tournament1 = new Tournament(
+                "Tournament 1",
+                null,
+                8,
+                LocalDateTime.of(2027, 9, 19, 18, 0),
+                LocalDateTime.of(2027, 9, 20, 18, 0),
+                48
+        );;
+        Tournament tournament2 = new Tournament(
+                "Tournament 2",
+                null,
+                8,
+                LocalDateTime.of(2027, 9, 19, 18, 0),
+                LocalDateTime.of(2027, 9, 20, 18, 0),
+                48
+        );;
 
         List<Tournament> expected = List.of(tournament1, tournament2);
 
@@ -94,14 +181,18 @@ class TournamentServiceTest {
         assertEquals(expected, actual);
     }
 
+    // getTournamentById ----------------------------------------------------------------------------------------------------
     @Test
     void getTournamentById_shouldReturnTournament_whenTournamentExists() {
         // arrange
         Tournament expected = new Tournament(
                 "Tournament 1",
                 null,
-                8
-        );
+                8,
+                LocalDateTime.of(2027, 9, 19, 18, 0),
+                LocalDateTime.of(2027, 9, 20, 18, 0),
+                48
+        );;
 
         when(tournamentRepository.findById(1L))
                 .thenReturn(Optional.of(expected));
@@ -125,6 +216,8 @@ class TournamentServiceTest {
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
     }
 
+    // deleteTournament ----------------------------------------------------------------------------------------------------
+
     @Test
     void deleteTournament_shouldDeleteCorrespondingTournament() {
         // arrange
@@ -133,8 +226,11 @@ class TournamentServiceTest {
         Tournament tournament = new Tournament(
                 "Tournament 1",
                 null,
-                8
-        );
+                8,
+                LocalDateTime.of(2027, 9, 19, 18, 0),
+                LocalDateTime.of(2027, 9, 20, 18, 0),
+                48
+        );;
 
         when(tournamentRepository.findById(tournamentId))
                 .thenReturn(Optional.of(tournament));
@@ -157,21 +253,26 @@ class TournamentServiceTest {
                 () -> tournamentService.deleteTournament(1L)
         );
 
-        verify(tournamentRepository, never()).delete(any());
+        verify(tournamentRepository, never()).deleteById(anyLong());
     }
+
+    // updateTournament ----------------------------------------------------------------------------------------------------
 
     @Test
     void updateTournament_shouldUpdateAndReturnTournament() {
-        // arrange
         Long tournamentId = 1L;
 
         Tournament existingTournament = new Tournament(
-                "Old Tournament",
+                "Tournament 1",
                 null,
-                8
+                8,
+                LocalDateTime.of(2027, 9, 19, 18, 0),
+                LocalDateTime.of(2027, 9, 20, 18, 0),
+                48
         );
 
-        TournamentDTO dto = new TournamentDTO();
+        TournamentDTO dto = createValidTournamentDTO();
+
         dto.name = "Updated Tournament";
         dto.maxCapacity = 16;
 
@@ -181,13 +282,14 @@ class TournamentServiceTest {
         when(tournamentRepository.save(existingTournament))
                 .thenReturn(existingTournament);
 
-        // act
         TournamentDTO result =
                 tournamentService.updateTournament(tournamentId, dto);
 
-        // assert
         assertEquals("Updated Tournament", result.name);
         assertEquals(16, result.maxCapacity);
+        assertEquals(dto.registrationDeadline, result.registrationDeadline);
+        assertEquals(dto.startDate, result.startDate);
+        assertEquals(48, result.roundDurationHours);
 
         verify(tournamentRepository).save(existingTournament);
     }

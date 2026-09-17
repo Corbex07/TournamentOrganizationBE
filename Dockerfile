@@ -11,7 +11,7 @@ RUN chmod +x gradlew # Makes gradle wrapper an executable
 
 COPY src src
 
-RUN ./gradlew bootJar -x test --no-daemon # Creates the docker image
+RUN ./gradlew bootJar -x test --no-daemon # Creates the build that can be copied
 
 
 FROM eclipse-temurin:25-jre-jammy

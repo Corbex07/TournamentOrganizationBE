@@ -31,8 +31,8 @@ public class TournamentController {
     }
 
     @GetMapping("/{id}")
-    public void getTournamentById (@PathVariable Long id) {
-        tournamentService.getTournamentById(id);
+    public Tournament getTournamentById (@PathVariable Long id) {
+        return tournamentService.getTournamentById(id);
     }
 
     @DeleteMapping("/{id}")
