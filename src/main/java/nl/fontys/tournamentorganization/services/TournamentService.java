@@ -36,27 +36,53 @@ public class TournamentService {
                     );
         }
 
-        public void saveTournament(TournamentDTO tournamentDTO) {
-            if (tournamentDTO.name == null || tournamentDTO.name.isBlank()) {
-                throw new IllegalArgumentException("Tournament name cannot be empty");
-            }
+    public void saveTournament(TournamentDTO tournamentDTO) {
+        validateTournament(tournamentDTO);
 
-            if (tournamentDTO.maxCapacity == null || tournamentDTO.maxCapacity <= 0) {
-                throw new IllegalArgumentException("Tournament capacity must be greater than 0");
-            }
+        Users organiser = userRepository.findById(5L)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Organiser not found")
+                );
 
-            // Temporary: simulate user with ID 1 being logged in
-            Users organiser = userRepository.findById(5L)
-                    .orElseThrow(() -> new IllegalArgumentException("Organiser not found"));
+        Tournament tournament = new Tournament(
+                tournamentDTO.name,
+                organiser,
+                tournamentDTO.maxCapacity,
+                tournamentDTO.registrationDeadline,
+                tournamentDTO.startDate,
+                tournamentDTO.roundDurationHours
+        );
 
-            Tournament tournament = new Tournament();
-            tournament.name = tournamentDTO.name;
-            tournament.maxCapacity = tournamentDTO.maxCapacity;
-            tournament.setOrganiser(organiser);
+        tournamentRepository.save(tournament);
+    }
 
-
-            tournamentRepository.save(tournament);
+    private void validateTournament(TournamentDTO dto) {
+        if (dto.name == null || dto.name.isBlank()) {
+            throw new IllegalArgumentException("Tournament name cannot be empty");
         }
+
+        if (dto.maxCapacity == null || dto.maxCapacity <= 0) {
+            throw new IllegalArgumentException("Tournament capacity must be greater than 0");
+        }
+
+        if (dto.startDate == null) {
+            throw new IllegalArgumentException("Tournament start date is required");
+        }
+
+        if (dto.registrationDeadline == null) {
+            throw new IllegalArgumentException("Registration deadline is required");
+        }
+
+        if (dto.registrationDeadline.isAfter(dto.startDate)) {
+            throw new IllegalArgumentException(
+                    "Registration deadline must be before tournament start"
+            );
+        }
+
+        if (dto.roundDurationHours == null || dto.roundDurationHours <= 0) {
+            throw new IllegalArgumentException("Round duration must be greater than 0");
+        }
+    }
 
         public void deleteTournament(Long id) {
             if (tournamentRepository.findById(id).isEmpty()) {
@@ -65,25 +91,33 @@ public class TournamentService {
             tournamentRepository.deleteById(id);
         }
 
-        public TournamentDTO updateTournament(Long id, TournamentDTO dto) {
-            Tournament tournament = tournamentRepository.findById(id)
-                    .orElseThrow(() ->
-                            new ResponseStatusException(
-                                    HttpStatus.NOT_FOUND,
-                                    "Tournament not found"
-                            )
-                    );
+    public TournamentDTO updateTournament(Long id, TournamentDTO dto) {
+        validateTournament(dto);
 
-            tournament.name = dto.name;
-            tournament.maxCapacity = dto.maxCapacity;
+        Tournament tournament = tournamentRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Tournament not found"
+                        )
+                );
 
-            Tournament updatedTournament = tournamentRepository.save(tournament);
+        tournament.setName(dto.name);
+        tournament.setMaxCapacity(dto.maxCapacity);
+        tournament.setRegistrationDeadline(dto.registrationDeadline);
+        tournament.setStartDate(dto.startDate);
+        tournament.setRoundDurationHours(dto.roundDurationHours);
 
-            TournamentDTO result = new TournamentDTO();
-            result.name = updatedTournament.name;
-            result.maxCapacity = updatedTournament.maxCapacity;
+        Tournament updatedTournament = tournamentRepository.save(tournament);
 
-            return result;
-        }
+        TournamentDTO result = new TournamentDTO();
+        result.name = updatedTournament.getName();
+        result.maxCapacity = updatedTournament.getMaxCapacity();
+        result.registrationDeadline = updatedTournament.getRegistrationDeadline();
+        result.startDate = updatedTournament.getStartDate();
+        result.roundDurationHours = updatedTournament.getRoundDurationHours();
+
+        return result;
     }
+}
 
