@@ -9,11 +9,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
+
 @Service
 public class TournamentService {
 
     private final ITournamentRepository tournamentRepository;
+
     private final IUserRepository userRepository;
 
     public TournamentService(ITournamentRepository tournamentRepository, IUserRepository userRepository) {
@@ -45,41 +48,41 @@ public class TournamentService {
                 );
 
         Tournament tournament = new Tournament(
-                tournamentDTO.name,
+                tournamentDTO.name(),
                 organiser,
-                tournamentDTO.maxCapacity,
-                tournamentDTO.registrationDeadline,
-                tournamentDTO.startDate,
-                tournamentDTO.roundDurationHours
+                tournamentDTO.maxCapacity(),
+                tournamentDTO.registrationDeadline(),
+                tournamentDTO.startDate(),
+                tournamentDTO.roundDurationHours()
         );
 
         tournamentRepository.save(tournament);
     }
 
     private void validateTournament(TournamentDTO dto) {
-        if (dto.name == null || dto.name.isBlank()) {
+        if (dto.name() == null || dto.name().isBlank()) {
             throw new IllegalArgumentException("Tournament name cannot be empty");
         }
 
-        if (dto.maxCapacity == null || dto.maxCapacity <= 0) {
+        if (dto.maxCapacity() == null || dto.maxCapacity() <= 0) {
             throw new IllegalArgumentException("Tournament capacity must be greater than 0");
         }
 
-        if (dto.startDate == null) {
+        if (dto.startDate() == null) {
             throw new IllegalArgumentException("Tournament start date is required");
         }
 
-        if (dto.registrationDeadline == null) {
+        if (dto.registrationDeadline() == null) {
             throw new IllegalArgumentException("Registration deadline is required");
         }
 
-        if (dto.registrationDeadline.isAfter(dto.startDate)) {
+        if (dto.registrationDeadline().isAfter(dto.startDate())) {
             throw new IllegalArgumentException(
                     "Registration deadline must be before tournament start"
             );
         }
 
-        if (dto.roundDurationHours == null || dto.roundDurationHours <= 0) {
+        if (dto.roundDurationHours() == null || dto.roundDurationHours() <= 0) {
             throw new IllegalArgumentException("Round duration must be greater than 0");
         }
     }
@@ -102,22 +105,27 @@ public class TournamentService {
                         )
                 );
 
-        tournament.setName(dto.name);
-        tournament.setMaxCapacity(dto.maxCapacity);
-        tournament.setRegistrationDeadline(dto.registrationDeadline);
-        tournament.setStartDate(dto.startDate);
-        tournament.setRoundDurationHours(dto.roundDurationHours);
+        tournament.setName(dto.name());
+        tournament.setMaxCapacity(dto.maxCapacity());
+        tournament.setRegistrationDeadline(dto.registrationDeadline());
+        tournament.setStartDate(dto.startDate());
+        tournament.setRoundDurationHours(dto.roundDurationHours());
 
         Tournament updatedTournament = tournamentRepository.save(tournament);
 
-        TournamentDTO result = new TournamentDTO();
-        result.name = updatedTournament.getName();
-        result.maxCapacity = updatedTournament.getMaxCapacity();
-        result.registrationDeadline = updatedTournament.getRegistrationDeadline();
-        result.startDate = updatedTournament.getStartDate();
-        result.roundDurationHours = updatedTournament.getRoundDurationHours();
+        return new TournamentDTO(
+                updatedTournament.getName(),
+                updatedTournament.getMaxCapacity(),
+                updatedTournament.getRegistrationDeadline(),
+                updatedTournament.getStartDate(),
+                updatedTournament.getRoundDurationHours()
+        );
+    }
 
-        return result;
+    public List<Tournament> getAllOpenRegistrationTournaments() {
+        return tournamentRepository.findByRegistrationDeadlineAfter(
+                LocalDateTime.now()
+        );
     }
 }
 

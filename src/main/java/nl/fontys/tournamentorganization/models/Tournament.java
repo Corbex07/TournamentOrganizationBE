@@ -12,14 +12,14 @@ public class Tournament {
     private Long id;
 
     @Column(name = "name")
-    public String name;
+    private String name;
 
     @ManyToOne
     @JoinColumn(name = "organiser_id")
     private Users organiser;
 
     @Column(name = "max_capacity")
-    public Integer maxCapacity;
+    private Integer maxCapacity;
 
     @Column(name = "registration_deadline")
     private LocalDateTime registrationDeadline;

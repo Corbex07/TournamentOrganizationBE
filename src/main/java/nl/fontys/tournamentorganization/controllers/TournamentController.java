@@ -24,6 +24,11 @@ public class TournamentController {
         return tournamentService.getAllTournaments();
     }
 
+    @GetMapping("/active")
+    public List<Tournament> allActive() {
+        return tournamentService.getAllOpenRegistrationTournaments();
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void createTournament(@RequestBody TournamentDTO tournamentDTO) {
