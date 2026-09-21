@@ -319,5 +319,27 @@ class TournamentServiceTest {
         verify(tournamentRepository).save(existingTournament);
     }
 
+    // getAllOpenRegistrationTournaments -------------------------------------------------------------------------------
+    
+    @Test
+    void getAllOpenRegistrationTournaments_shouldReturnOpenTournaments() {
+        // Arrange
+        Tournament tournament1 = new Tournament();
+        Tournament tournament2 = new Tournament();
+
+        List<Tournament> expected = List.of(tournament1, tournament2);
+
+        when(tournamentRepository
+                .findByRegistrationDeadlineAfter(any(LocalDateTime.class)))
+                .thenReturn(expected);
+
+        // Act
+        List<Tournament> actual =
+                tournamentService.getAllOpenRegistrationTournaments();
+
+        // Assert
+        assertEquals(expected, actual);
+    }
+
 }
 
