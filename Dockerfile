@@ -1,3 +1,4 @@
+# Keep this until proper CD is built, after that this part is redundant
 FROM eclipse-temurin:25-jdk-jammy AS build
 
 WORKDIR /app
