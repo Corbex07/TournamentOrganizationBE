@@ -1,6 +1,7 @@
 package nl.fontys.tournamentorganization.controllers;
 
-import nl.fontys.tournamentorganization.DTOs.TournamentDTO;
+import nl.fontys.tournamentorganization.DTOs.CreateTournamentRequestDTO;
+import nl.fontys.tournamentorganization.DTOs.UpdateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.models.Tournament;
 import nl.fontys.tournamentorganization.services.TournamentService;
 import org.springframework.http.HttpStatus;
@@ -9,7 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/apiV1/tournaments")
+@RequestMapping("/api/V1/tournaments")
+@CrossOrigin(origins = "http://localhost:5173")
 public class TournamentController {
 
     private final TournamentService tournamentService;
@@ -31,8 +33,8 @@ public class TournamentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createTournament(@RequestBody TournamentDTO tournamentDTO) {
-        tournamentService.saveTournament(tournamentDTO);
+    public void createTournament(@RequestBody CreateTournamentRequestDTO createTournamentRequestDTO) {
+        tournamentService.createTournament(createTournamentRequestDTO);
     }
 
     @GetMapping("/{id}")
@@ -49,8 +51,8 @@ public class TournamentController {
     @PutMapping("/{id}")
     public void updateTournament(
             @PathVariable Long id,
-            @RequestBody TournamentDTO tournamentDTO) {
+            @RequestBody UpdateTournamentRequestDTO updateTournamentRequestDTO) {
 
-        tournamentService.updateTournament(id, tournamentDTO);
+        tournamentService.updateTournament(id, updateTournamentRequestDTO);
     }
 }

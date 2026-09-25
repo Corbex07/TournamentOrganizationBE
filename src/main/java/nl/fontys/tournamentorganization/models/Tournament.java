@@ -1,6 +1,7 @@
 package nl.fontys.tournamentorganization.models;
 
 import jakarta.persistence.*;
+import nl.fontys.tournamentorganization.enums.TournamentStatus;
 
 import java.time.LocalDateTime;
 
@@ -29,6 +30,7 @@ public class Tournament {
 
     @Column(name = "round_duration_hours")
     private Integer roundDurationHours;
+
 
 
     public Tournament() {

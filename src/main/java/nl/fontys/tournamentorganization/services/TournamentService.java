@@ -1,6 +1,7 @@
 package nl.fontys.tournamentorganization.services;
 
-import nl.fontys.tournamentorganization.DTOs.TournamentDTO;
+import nl.fontys.tournamentorganization.DTOs.CreateTournamentRequestDTO;
+import nl.fontys.tournamentorganization.DTOs.UpdateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.interfaces.ITournamentRepository;
 import nl.fontys.tournamentorganization.interfaces.IUserRepository;
 import nl.fontys.tournamentorganization.models.Tournament;
@@ -39,8 +40,13 @@ public class TournamentService {
                     );
         }
 
-    public void saveTournament(TournamentDTO tournamentDTO) {
-        validateTournament(tournamentDTO);
+    public void createTournament(CreateTournamentRequestDTO dto) {
+        validateTournament(
+                dto.name(),
+                dto.maxCapacity(),
+                dto.registrationDeadline(),
+                dto.startDate(),
+                dto.roundDurationHours());
 
         Users organiser = userRepository.findById(5L)
                 .orElseThrow(() ->
@@ -48,42 +54,56 @@ public class TournamentService {
                 );
 
         Tournament tournament = new Tournament(
-                tournamentDTO.name(),
+                dto.name(),
                 organiser,
-                tournamentDTO.maxCapacity(),
-                tournamentDTO.registrationDeadline(),
-                tournamentDTO.startDate(),
-                tournamentDTO.roundDurationHours()
+                dto.maxCapacity(),
+                dto.registrationDeadline(),
+                dto.startDate(),
+                dto.roundDurationHours()
         );
 
         tournamentRepository.save(tournament);
     }
 
-    private void validateTournament(TournamentDTO dto) {
-        if (dto.name() == null || dto.name().isBlank()) {
+    private void validateTournament(
+            String name,
+            Integer maxCapacity,
+            LocalDateTime registrationDeadline,
+            LocalDateTime startDate,
+            Integer roundDurationHours
+    ) {
+        if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Tournament name cannot be empty");
         }
 
-        if (dto.maxCapacity() == null || dto.maxCapacity() <= 0) {
-            throw new IllegalArgumentException("Tournament capacity must be greater than 0");
+        if (maxCapacity == null || maxCapacity <= 0) {
+            throw new IllegalArgumentException(
+                    "Tournament capacity must be greater than 0"
+            );
         }
 
-        if (dto.startDate() == null) {
-            throw new IllegalArgumentException("Tournament start date is required");
+        if (startDate == null) {
+            throw new IllegalArgumentException(
+                    "Tournament start date is required"
+            );
         }
 
-        if (dto.registrationDeadline() == null) {
-            throw new IllegalArgumentException("Registration deadline is required");
+        if (registrationDeadline == null) {
+            throw new IllegalArgumentException(
+                    "Registration deadline is required"
+            );
         }
 
-        if (dto.registrationDeadline().isAfter(dto.startDate())) {
+        if (registrationDeadline.isAfter(startDate)) {
             throw new IllegalArgumentException(
                     "Registration deadline must be before tournament start"
             );
         }
 
-        if (dto.roundDurationHours() == null || dto.roundDurationHours() <= 0) {
-            throw new IllegalArgumentException("Round duration must be greater than 0");
+        if (roundDurationHours == null || roundDurationHours <= 0) {
+            throw new IllegalArgumentException(
+                    "Round duration must be greater than 0"
+            );
         }
     }
 
@@ -94,8 +114,13 @@ public class TournamentService {
             tournamentRepository.deleteById(id);
         }
 
-    public TournamentDTO updateTournament(Long id, TournamentDTO dto) {
-        validateTournament(dto);
+    public UpdateTournamentRequestDTO updateTournament(Long id, UpdateTournamentRequestDTO dto) {
+        validateTournament(
+                dto.name(),
+                dto.maxCapacity(),
+                dto.registrationDeadline(),
+                dto.startDate(),
+                dto.roundDurationHours());
 
         Tournament tournament = tournamentRepository.findById(id)
                 .orElseThrow(() ->
@@ -113,7 +138,7 @@ public class TournamentService {
 
         Tournament updatedTournament = tournamentRepository.save(tournament);
 
-        return new TournamentDTO(
+        return new UpdateTournamentRequestDTO(
                 updatedTournament.getName(),
                 updatedTournament.getMaxCapacity(),
                 updatedTournament.getRegistrationDeadline(),

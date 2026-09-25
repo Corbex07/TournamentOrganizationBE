@@ -1,5 +1,6 @@
 package nl.fontys.tournamentorganization.Config;
 
+import nl.fontys.tournamentorganization.enums.TournamentStatus;
 import nl.fontys.tournamentorganization.interfaces.ITournamentRepository;
 import nl.fontys.tournamentorganization.interfaces.IUserRepository;
 import nl.fontys.tournamentorganization.models.Tournament;

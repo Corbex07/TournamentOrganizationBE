@@ -1,6 +1,7 @@
 package nl.fontys.tournamentorganization.ServiceTest;
 
-import nl.fontys.tournamentorganization.DTOs.TournamentDTO;
+import nl.fontys.tournamentorganization.DTOs.CreateTournamentRequestDTO;
+import nl.fontys.tournamentorganization.DTOs.UpdateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.interfaces.ITournamentRepository;
 import nl.fontys.tournamentorganization.interfaces.IUserRepository;
 import nl.fontys.tournamentorganization.models.Tournament;
@@ -13,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
@@ -37,8 +37,17 @@ class TournamentServiceTest {
     @InjectMocks
     private TournamentService tournamentService;
 
-    private TournamentDTO createValidTournamentDTO() {
-        return new TournamentDTO(
+    private CreateTournamentRequestDTO createValidCreateTournamentRequestDTO() {
+        return new CreateTournamentRequestDTO(
+                "Fontys Valorant Cup",
+                8,
+                LocalDateTime.of(2027, 9, 20, 18, 0),
+                LocalDateTime.of(2027, 9, 21, 18, 0),
+                48
+        );
+    }
+    private UpdateTournamentRequestDTO createValidUpdateTournamentRequestDTO() {
+        return new UpdateTournamentRequestDTO(
                 "Fontys Valorant Cup",
                 8,
                 LocalDateTime.of(2027, 9, 20, 18, 0),
@@ -51,14 +60,14 @@ class TournamentServiceTest {
 
     @Test
     void saveTournament_shouldSaveTournamentWithCorrectValues() {
-        TournamentDTO tournamentDTO = createValidTournamentDTO();
+        CreateTournamentRequestDTO createTournamentRequestDTO = createValidCreateTournamentRequestDTO();
 
         Users organiser = mock(Users.class);
 
         when(userRepository.findById(5L))
                 .thenReturn(Optional.of(organiser));
 
-        tournamentService.saveTournament(tournamentDTO);
+        tournamentService.createTournament(createTournamentRequestDTO);
 
         ArgumentCaptor<Tournament> captor =
                 ArgumentCaptor.forClass(Tournament.class);
@@ -70,11 +79,11 @@ class TournamentServiceTest {
         assertEquals("Fontys Valorant Cup", savedTournament.getName());
         assertEquals(8, savedTournament.getMaxCapacity());
         assertEquals(
-                tournamentDTO.registrationDeadline(),
+                createTournamentRequestDTO.registrationDeadline(),
                 savedTournament.getRegistrationDeadline()
         );
         assertEquals(
-                tournamentDTO.startDate(),
+                createTournamentRequestDTO.startDate(),
                 savedTournament.getStartDate()
         );
         assertEquals(
@@ -88,9 +97,9 @@ class TournamentServiceTest {
     }
     @Test
     void saveTournament_shouldThrowException_whenCapacityIsNegative() {
-        TournamentDTO validDTO = createValidTournamentDTO();
+        CreateTournamentRequestDTO validDTO = createValidCreateTournamentRequestDTO();
 
-        TournamentDTO tournamentDTO = new TournamentDTO(
+        CreateTournamentRequestDTO createTournamentRequestDTO = new CreateTournamentRequestDTO(
                 validDTO.name(),
                 -5,
                 validDTO.registrationDeadline(),
@@ -101,7 +110,7 @@ class TournamentServiceTest {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> tournamentService.saveTournament(tournamentDTO)
+                () -> tournamentService.createTournament(createTournamentRequestDTO)
         );
 
         verify(tournamentRepository, never())
@@ -109,9 +118,9 @@ class TournamentServiceTest {
     }
     @Test
     void saveTournament_shouldThrowException_whenNameIsNull() {
-        TournamentDTO validDTO = createValidTournamentDTO();
+        CreateTournamentRequestDTO validDTO = createValidCreateTournamentRequestDTO();
 
-        TournamentDTO tournamentDTO = new TournamentDTO(
+        CreateTournamentRequestDTO createTournamentRequestDTO = new CreateTournamentRequestDTO(
                 null,
                 validDTO.maxCapacity(),
                 validDTO.registrationDeadline(),
@@ -121,7 +130,7 @@ class TournamentServiceTest {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> tournamentService.saveTournament(tournamentDTO)
+                () -> tournamentService.createTournament(createTournamentRequestDTO)
         );
 
         verify(tournamentRepository, never())
@@ -130,9 +139,9 @@ class TournamentServiceTest {
 
     @Test
     void saveTournament_shouldThrowException_whenStartDateIsNull() {
-        TournamentDTO validDTO = createValidTournamentDTO();
+        CreateTournamentRequestDTO validDTO = createValidCreateTournamentRequestDTO();
 
-        TournamentDTO tournamentDTO = new TournamentDTO(
+        CreateTournamentRequestDTO createTournamentRequestDTO = new CreateTournamentRequestDTO(
                 validDTO.name(),
                 validDTO.maxCapacity(),
                 validDTO.registrationDeadline(),
@@ -142,7 +151,7 @@ class TournamentServiceTest {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> tournamentService.saveTournament(tournamentDTO)
+                () -> tournamentService.createTournament(createTournamentRequestDTO)
         );
 
         verify(tournamentRepository, never())
@@ -151,9 +160,9 @@ class TournamentServiceTest {
 
     @Test
     void saveTournament_shouldThrowException_whenRegistrationDeadlineIsAfterStartDate() {
-        TournamentDTO validDTO = createValidTournamentDTO();
+        CreateTournamentRequestDTO validDTO = createValidCreateTournamentRequestDTO();
 
-        TournamentDTO tournamentDTO = new TournamentDTO(
+        CreateTournamentRequestDTO createTournamentRequestDTO = new CreateTournamentRequestDTO(
                 validDTO.name(),
                 validDTO.maxCapacity(),
                 LocalDateTime.of(2027, 9, 22, 18, 0),
@@ -163,7 +172,7 @@ class TournamentServiceTest {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> tournamentService.saveTournament(tournamentDTO)
+                () -> tournamentService.createTournament(createTournamentRequestDTO)
         );
 
         verify(tournamentRepository, never())
@@ -182,7 +191,7 @@ class TournamentServiceTest {
                 LocalDateTime.of(2027, 9, 19, 18, 0),
                 LocalDateTime.of(2027, 9, 20, 18, 0),
                 48
-        );;
+        );
         Tournament tournament2 = new Tournament(
                 "Tournament 2",
                 null,
@@ -190,7 +199,7 @@ class TournamentServiceTest {
                 LocalDateTime.of(2027, 9, 19, 18, 0),
                 LocalDateTime.of(2027, 9, 20, 18, 0),
                 48
-        );;
+        );
 
         List<Tournament> expected = List.of(tournament1, tournament2);
 
@@ -212,7 +221,7 @@ class TournamentServiceTest {
                 LocalDateTime.of(2027, 9, 19, 18, 0),
                 LocalDateTime.of(2027, 9, 20, 18, 0),
                 48
-        );;
+        );
 
         when(tournamentRepository.findById(1L))
                 .thenReturn(Optional.of(expected));
@@ -250,7 +259,7 @@ class TournamentServiceTest {
                 LocalDateTime.of(2027, 9, 19, 18, 0),
                 LocalDateTime.of(2027, 9, 20, 18, 0),
                 48
-        );;
+        );
 
         when(tournamentRepository.findById(tournamentId))
                 .thenReturn(Optional.of(tournament));
@@ -291,9 +300,9 @@ class TournamentServiceTest {
                 48
         );
 
-        TournamentDTO validDTO = createValidTournamentDTO();
+        UpdateTournamentRequestDTO validDTO = createValidUpdateTournamentRequestDTO();
 
-        TournamentDTO tournamentDTO = new TournamentDTO(
+        UpdateTournamentRequestDTO UpdateTournamentRequestDTO = new UpdateTournamentRequestDTO(
                 "Updated Tournament",
                 16,
                 validDTO.registrationDeadline(),
@@ -307,8 +316,8 @@ class TournamentServiceTest {
         when(tournamentRepository.save(existingTournament))
                 .thenReturn(existingTournament);
 
-        TournamentDTO result =
-                tournamentService.updateTournament(tournamentId, tournamentDTO);
+        UpdateTournamentRequestDTO result =
+                tournamentService.updateTournament(tournamentId, UpdateTournamentRequestDTO);
 
         assertEquals("Updated Tournament", result.name());
         assertEquals(16, result.maxCapacity());

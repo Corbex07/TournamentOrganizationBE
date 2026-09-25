@@ -2,7 +2,7 @@ package nl.fontys.tournamentorganization.DTOs;
 
 import java.time.LocalDateTime;
 
-public record TournamentDTO(
+public record CreateTournamentRequestDTO(
         String name,
         Integer maxCapacity,
         LocalDateTime registrationDeadline,
