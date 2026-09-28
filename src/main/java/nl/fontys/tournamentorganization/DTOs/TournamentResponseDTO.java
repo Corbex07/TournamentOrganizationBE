@@ -10,4 +10,4 @@ public record TournamentResponseDTO(
         LocalDateTime startDate,
         Integer roundDurationHours,
         String organiserName
-) {}
+) { }

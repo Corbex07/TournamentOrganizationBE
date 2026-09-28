@@ -3,7 +3,6 @@ package nl.fontys.tournamentorganization.controllers;
 import nl.fontys.tournamentorganization.DTOs.CreateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.DTOs.TournamentResponseDTO;
 import nl.fontys.tournamentorganization.DTOs.UpdateTournamentRequestDTO;
-import nl.fontys.tournamentorganization.models.Tournament;
 import nl.fontys.tournamentorganization.services.TournamentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
