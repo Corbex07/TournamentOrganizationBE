@@ -1,6 +1,7 @@
 package nl.fontys.tournamentorganization.services;
 
 import nl.fontys.tournamentorganization.DTOs.CreateTournamentRequestDTO;
+import nl.fontys.tournamentorganization.DTOs.TournamentResponseDTO;
 import nl.fontys.tournamentorganization.DTOs.UpdateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.interfaces.ITournamentRepository;
 import nl.fontys.tournamentorganization.interfaces.IUserRepository;
@@ -25,20 +26,45 @@ public class TournamentService {
         this.userRepository = userRepository;
     }
 
-    public List<Tournament> getAllTournaments() {
-
-        return tournamentRepository.findAll();
+    public List<TournamentResponseDTO> getAllTournaments() {
+        return tournamentRepository.findAll()
+                .stream()
+                .map(tournament -> new TournamentResponseDTO(
+                        tournament.getId(),
+                        tournament.getName(),
+                        tournament.getMaxCapacity(),
+                        tournament.getRegistrationDeadline(),
+                        tournament.getStartDate(),
+                        tournament.getRoundDurationHours(),
+                        tournament.getOrganiser().getUsername()
+                ))
+                .toList();
     }
 
     public Tournament getTournamentById(Long id) {
         return tournamentRepository.findById(id)
-                    .orElseThrow(() ->
-                            new ResponseStatusException(
-                                    HttpStatus.NOT_FOUND,
-                                    "Tournament not found"
-                            )
-                    );
-        }
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Tournament not found"
+                        )
+                );
+    }
+
+
+    public TournamentResponseDTO getTournamentResponseById(Long id) {
+        Tournament tournament = getTournamentById(id);
+
+        return new TournamentResponseDTO(
+                tournament.getId(),
+                tournament.getName(),
+                tournament.getMaxCapacity(),
+                tournament.getRegistrationDeadline(),
+                tournament.getStartDate(),
+                tournament.getRoundDurationHours(),
+                tournament.getOrganiser().getUsername()
+        );
+    }
 
     public void createTournament(CreateTournamentRequestDTO dto) {
         validateTournament(
@@ -47,8 +73,8 @@ public class TournamentService {
                 dto.registrationDeadline(),
                 dto.startDate(),
                 dto.roundDurationHours());
-
-        Users organiser = userRepository.findById(5L)
+        // done manually due to not having implemented users yet.
+        Users organiser = userRepository.findById(1L)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Organiser not found")
                 );
@@ -107,7 +133,7 @@ public class TournamentService {
         }
     }
 
-        public void deleteTournament(Long id) {
+    public void deleteTournament(Long id) {
             if (tournamentRepository.findById(id).isEmpty()) {
                 throw new IllegalArgumentException("Tournament does not exist");
             }
@@ -147,9 +173,23 @@ public class TournamentService {
         );
     }
 
-    public List<Tournament> getAllOpenRegistrationTournaments() {
-        return tournamentRepository.findByRegistrationDeadlineAfter(
-                LocalDateTime.now()
+    public List<TournamentResponseDTO> getAllOpenRegistrationTournaments() {
+        return tournamentRepository
+                .findByRegistrationDeadlineAfter(LocalDateTime.now())
+                .stream()
+                .map(this::toResponseDTO)
+                .toList();
+    }
+
+    private TournamentResponseDTO toResponseDTO(Tournament tournament) {
+        return new TournamentResponseDTO(
+                tournament.getId(),
+                tournament.getName(),
+                tournament.getMaxCapacity(),
+                tournament.getRegistrationDeadline(),
+                tournament.getStartDate(),
+                tournament.getRoundDurationHours(),
+                tournament.getOrganiser().getUsername()
         );
     }
 }

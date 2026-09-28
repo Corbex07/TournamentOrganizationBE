@@ -1,6 +1,7 @@
 package nl.fontys.tournamentorganization.ServiceTest;
 
 import nl.fontys.tournamentorganization.DTOs.CreateTournamentRequestDTO;
+import nl.fontys.tournamentorganization.DTOs.TournamentResponseDTO;
 import nl.fontys.tournamentorganization.DTOs.UpdateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.interfaces.ITournamentRepository;
 import nl.fontys.tournamentorganization.interfaces.IUserRepository;
@@ -64,7 +65,7 @@ class TournamentServiceTest {
 
         Users organiser = mock(Users.class);
 
-        when(userRepository.findById(5L))
+        when(userRepository.findById(1L))
                 .thenReturn(Optional.of(organiser));
 
         tournamentService.createTournament(createTournamentRequestDTO);
@@ -184,32 +185,66 @@ class TournamentServiceTest {
     @Test
     void getAllTournaments_shouldReturnAllTournaments() {
         // arrange
-        Tournament tournament1 = new Tournament(
-                "Tournament 1",
-                null,
-                8,
-                LocalDateTime.of(2027, 9, 19, 18, 0),
-                LocalDateTime.of(2027, 9, 20, 18, 0),
-                48
+        Users organiser = new Users();
+        organiser.setUsername("organiserUno");
+
+        Tournament tournament1 = new Tournament();
+        tournament1.setId(1L);
+        tournament1.setName("Tournament1");
+        tournament1.setMaxCapacity(8);
+        tournament1.setRegistrationDeadline(
+                LocalDateTime.of(2027, 9, 19, 18, 0)
         );
-        Tournament tournament2 = new Tournament(
-                "Tournament 2",
-                null,
-                8,
-                LocalDateTime.of(2027, 9, 19, 18, 0),
-                LocalDateTime.of(2027, 9, 20, 18, 0),
-                48
+        tournament1.setStartDate(
+                LocalDateTime.of(2027, 9, 20, 18, 0)
+        );
+        tournament1.setRoundDurationHours(48);
+        tournament1.setOrganiser(organiser);
+
+        Tournament tournament2 = new Tournament();
+        tournament2.setId(2L);
+        tournament2.setName("Tournament2");
+        tournament2.setMaxCapacity(8);
+        tournament2.setRegistrationDeadline(
+                LocalDateTime.of(2027, 9, 19, 18, 0)
+        );
+        tournament2.setStartDate(
+                LocalDateTime.of(2027, 9, 20, 18, 0)
+        );
+        tournament2.setRoundDurationHours(48);
+        tournament2.setOrganiser(organiser);
+
+        when(tournamentRepository.findAll())
+                .thenReturn(List.of(tournament1, tournament2));
+
+        List<TournamentResponseDTO> expected = List.of(
+                new TournamentResponseDTO(
+                        1L,
+                        "Tournament1",
+                        8,
+                        LocalDateTime.of(2027, 9, 19, 18, 0),
+                        LocalDateTime.of(2027, 9, 20, 18, 0),
+                        48,
+                        "organiserUno"
+                ),
+                new TournamentResponseDTO(
+                        2L,
+                        "Tournament2",
+                        8,
+                        LocalDateTime.of(2027, 9, 19, 18, 0),
+                        LocalDateTime.of(2027, 9, 20, 18, 0),
+                        48,
+                        "organiserUno"
+                )
         );
 
-        List<Tournament> expected = List.of(tournament1, tournament2);
+        // act
+        List<TournamentResponseDTO> actual =
+                tournamentService.getAllTournaments();
 
-        when(tournamentRepository.findAll()).thenReturn(expected);
-        // acts
-        List<Tournament> actual = tournamentService.getAllTournaments();
-        // asserts
+        // assert
         assertEquals(expected, actual);
     }
-
     // getTournamentById ----------------------------------------------------------------------------------------------------
     @Test
     void getTournamentById_shouldReturnTournament_whenTournamentExists() {
@@ -333,17 +368,62 @@ class TournamentServiceTest {
     @Test
     void getAllOpenRegistrationTournaments_shouldReturnOpenTournaments() {
         // Arrange
-        Tournament tournament1 = new Tournament();
-        Tournament tournament2 = new Tournament();
+        Users organiser = new Users();
+        organiser.setUsername("organiserUno");
 
-        List<Tournament> expected = List.of(tournament1, tournament2);
+        Tournament tournament1 = new Tournament();
+        tournament1.setId(1L);
+        tournament1.setName("Tournament1");
+        tournament1.setMaxCapacity(8);
+        tournament1.setRegistrationDeadline(
+                LocalDateTime.of(2027, 9, 19, 18, 0)
+        );
+        tournament1.setStartDate(
+                LocalDateTime.of(2027, 9, 20, 18, 0)
+        );
+        tournament1.setRoundDurationHours(48);
+        tournament1.setOrganiser(organiser);
+
+        Tournament tournament2 = new Tournament();
+        tournament2.setId(2L);
+        tournament2.setName("Tournament2");
+        tournament2.setMaxCapacity(16);
+        tournament2.setRegistrationDeadline(
+                LocalDateTime.of(2027, 10, 19, 18, 0)
+        );
+        tournament2.setStartDate(
+                LocalDateTime.of(2027, 10, 20, 18, 0)
+        );
+        tournament2.setRoundDurationHours(24);
+        tournament2.setOrganiser(organiser);
 
         when(tournamentRepository
                 .findByRegistrationDeadlineAfter(any(LocalDateTime.class)))
-                .thenReturn(expected);
+                .thenReturn(List.of(tournament1, tournament2));
+
+        List<TournamentResponseDTO> expected = List.of(
+                new TournamentResponseDTO(
+                        1L,
+                        "Tournament1",
+                        8,
+                        LocalDateTime.of(2027, 9, 19, 18, 0),
+                        LocalDateTime.of(2027, 9, 20, 18, 0),
+                        48,
+                        "organiserUno"
+                ),
+                new TournamentResponseDTO(
+                        2L,
+                        "Tournament2",
+                        16,
+                        LocalDateTime.of(2027, 10, 19, 18, 0),
+                        LocalDateTime.of(2027, 10, 20, 18, 0),
+                        24,
+                        "organiserUno"
+                )
+        );
 
         // Act
-        List<Tournament> actual =
+        List<TournamentResponseDTO> actual =
                 tournamentService.getAllOpenRegistrationTournaments();
 
         // Assert

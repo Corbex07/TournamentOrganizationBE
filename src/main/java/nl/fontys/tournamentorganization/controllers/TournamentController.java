@@ -1,6 +1,7 @@
 package nl.fontys.tournamentorganization.controllers;
 
 import nl.fontys.tournamentorganization.DTOs.CreateTournamentRequestDTO;
+import nl.fontys.tournamentorganization.DTOs.TournamentResponseDTO;
 import nl.fontys.tournamentorganization.DTOs.UpdateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.models.Tournament;
 import nl.fontys.tournamentorganization.services.TournamentService;
@@ -22,12 +23,12 @@ public class TournamentController {
     }
 
     @GetMapping
-    public List<Tournament> all() {
+    public List<TournamentResponseDTO> all() {
         return tournamentService.getAllTournaments();
     }
 
     @GetMapping("/active")
-    public List<Tournament> allActive() {
+    public List<TournamentResponseDTO> allActive() {
         return tournamentService.getAllOpenRegistrationTournaments();
     }
 
@@ -38,8 +39,8 @@ public class TournamentController {
     }
 
     @GetMapping("/{id}")
-    public Tournament getTournamentById (@PathVariable Long id) {
-        return tournamentService.getTournamentById(id);
+    public TournamentResponseDTO getTournamentById (@PathVariable Long id) {
+        return tournamentService.getTournamentResponseById(id);
     }
 
     @DeleteMapping("/{id}")

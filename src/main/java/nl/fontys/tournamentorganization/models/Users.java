@@ -20,7 +20,7 @@ public class Users {
     @Column(name = "password")
     private String password;
 
-    protected Users() {
+    public Users() {
     }
 
     public Users(String username, String email, String password) {
@@ -44,4 +44,9 @@ public class Users {
     public String getPassword() {
         return password;
     }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
 }
