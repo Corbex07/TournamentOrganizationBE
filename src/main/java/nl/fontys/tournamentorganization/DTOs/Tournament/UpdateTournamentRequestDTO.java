@@ -1,4 +1,4 @@
-package nl.fontys.tournamentorganization.DTOs;
+package nl.fontys.tournamentorganization.DTOs.Tournament;
 
 import java.time.LocalDateTime;
 

@@ -4,4 +4,7 @@ import nl.fontys.tournamentorganization.models.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface IUserRepository extends JpaRepository<Users, Long> {
+    boolean existsByUsername(String username);
+
+    boolean existsByEmail(String email);
 }

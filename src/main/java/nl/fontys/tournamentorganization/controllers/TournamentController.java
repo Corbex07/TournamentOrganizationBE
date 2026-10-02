@@ -1,8 +1,8 @@
 package nl.fontys.tournamentorganization.controllers;
 
-import nl.fontys.tournamentorganization.DTOs.CreateTournamentRequestDTO;
-import nl.fontys.tournamentorganization.DTOs.TournamentResponseDTO;
-import nl.fontys.tournamentorganization.DTOs.UpdateTournamentRequestDTO;
+import nl.fontys.tournamentorganization.DTOs.Tournament.CreateTournamentRequestDTO;
+import nl.fontys.tournamentorganization.DTOs.Tournament.TournamentResponseDTO;
+import nl.fontys.tournamentorganization.DTOs.Tournament.UpdateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.services.TournamentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

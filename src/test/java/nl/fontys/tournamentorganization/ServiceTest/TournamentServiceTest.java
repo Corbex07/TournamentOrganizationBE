@@ -1,8 +1,8 @@
 package nl.fontys.tournamentorganization.ServiceTest;
 
-import nl.fontys.tournamentorganization.DTOs.CreateTournamentRequestDTO;
-import nl.fontys.tournamentorganization.DTOs.TournamentResponseDTO;
-import nl.fontys.tournamentorganization.DTOs.UpdateTournamentRequestDTO;
+import nl.fontys.tournamentorganization.DTOs.Tournament.CreateTournamentRequestDTO;
+import nl.fontys.tournamentorganization.DTOs.Tournament.TournamentResponseDTO;
+import nl.fontys.tournamentorganization.DTOs.Tournament.UpdateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.interfaces.ITournamentRepository;
 import nl.fontys.tournamentorganization.interfaces.IUserRepository;
 import nl.fontys.tournamentorganization.models.Tournament;
