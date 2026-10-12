@@ -5,11 +5,13 @@ import nl.fontys.tournamentorganization.Mappers.TournamentMapper;
 import nl.fontys.tournamentorganization.Repositories.Interfaces.TournamentRepository;
 import nl.fontys.tournamentorganization.Repositories.Jpa.JpaTournamentRepository;
 import nl.fontys.tournamentorganization.models.Tournament;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public class TournamentRepositoryImpl implements TournamentRepository {
 
     private final JpaTournamentRepository jpaRepository;

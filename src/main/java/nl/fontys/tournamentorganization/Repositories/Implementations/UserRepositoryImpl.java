@@ -1,0 +1,33 @@
+package nl.fontys.tournamentorganization.Repositories.Implementations;
+
+import nl.fontys.tournamentorganization.Domains.UserDomain;
+import nl.fontys.tournamentorganization.Mappers.TournamentMapper;
+import nl.fontys.tournamentorganization.Mappers.UserMapper;
+import nl.fontys.tournamentorganization.Repositories.Interfaces.UserRepository;
+import nl.fontys.tournamentorganization.Repositories.Jpa.JpaTournamentRepository;
+import nl.fontys.tournamentorganization.Repositories.Jpa.JpaUserRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public class UserRepositoryImpl implements UserRepository {
+
+    private final JpaUserRepository jpaRepository;
+    private final UserMapper userMapper;
+
+    public UserRepositoryImpl(
+            JpaUserRepository jpaRepository,
+            UserMapper userMapper
+    ) {
+        this.jpaRepository = jpaRepository;
+        this.userMapper = userMapper;
+    }
+
+    @Override
+    public Optional<UserDomain> findById(Long id) {
+        return jpaRepository.findById(id)
+                .map(userMapper::toDomain);
+
+    }
+}

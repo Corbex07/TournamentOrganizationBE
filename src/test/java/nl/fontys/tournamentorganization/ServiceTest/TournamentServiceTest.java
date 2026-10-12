@@ -4,18 +4,24 @@ import nl.fontys.tournamentorganization.DTOs.Tournament.CreateTournamentRequestD
 import nl.fontys.tournamentorganization.DTOs.Tournament.TournamentResponseDTO;
 import nl.fontys.tournamentorganization.DTOs.Tournament.UpdateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.Domains.TournamentDomain;
+import nl.fontys.tournamentorganization.Domains.UserDomain;
+import nl.fontys.tournamentorganization.Mappers.TournamentDtoMapper;
 import nl.fontys.tournamentorganization.Mappers.TournamentMapper;
 import nl.fontys.tournamentorganization.Mappers.UserMapper;
+import nl.fontys.tournamentorganization.Repositories.Interfaces.TournamentRepository;
+import nl.fontys.tournamentorganization.Repositories.Interfaces.UserRepository;
 import nl.fontys.tournamentorganization.Repositories.Jpa.JpaTournamentRepository;
 import nl.fontys.tournamentorganization.Repositories.Jpa.JpaUserRepository;
 import nl.fontys.tournamentorganization.models.Tournament;
 import nl.fontys.tournamentorganization.models.Users;
 import nl.fontys.tournamentorganization.services.TournamentService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -33,13 +39,31 @@ import static org.mockito.Mockito.*;
 class TournamentServiceTest {
 
     @Mock
-    private JpaTournamentRepository tournamentRepository;
+    private JpaTournamentRepository jpaTournamentRepository;
 
     @Mock
-    private JpaUserRepository userRepository;
+    private TournamentRepository tournamentRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private TournamentService tournamentService;
+
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        TournamentDtoMapper tournamentDtoMapper =
+                new TournamentDtoMapper();
+
+        tournamentService = new TournamentService(
+                userRepository,
+                tournamentRepository,
+                tournamentDtoMapper
+        );
+    }
 
     private CreateTournamentRequestDTO createValidCreateTournamentRequestDTO() {
         return new CreateTournamentRequestDTO(
@@ -66,19 +90,19 @@ class TournamentServiceTest {
     void saveTournament_shouldSaveTournamentWithCorrectValues() {
         CreateTournamentRequestDTO createTournamentRequestDTO = createValidCreateTournamentRequestDTO();
 
-        Users organiser = mock(Users.class);
+        UserDomain organiser = mock(UserDomain.class);
 
         when(userRepository.findById(1L))
                 .thenReturn(Optional.of(organiser));
 
         tournamentService.createTournament(createTournamentRequestDTO);
 
-        ArgumentCaptor<Tournament> captor =
-                ArgumentCaptor.forClass(Tournament.class);
+        ArgumentCaptor<TournamentDomain> captor =
+                ArgumentCaptor.forClass(TournamentDomain.class);
 
         verify(tournamentRepository).save(captor.capture());
 
-        Tournament savedTournament = captor.getValue();
+        TournamentDomain savedTournament = captor.getValue();
 
         assertEquals("Fontys Valorant Cup", savedTournament.getName());
         assertEquals(8, savedTournament.getMaxCapacity());
@@ -118,7 +142,7 @@ class TournamentServiceTest {
         );
 
         verify(tournamentRepository, never())
-                .save(any(Tournament.class));
+                .save(any(TournamentDomain.class));
     }
     @Test
     void saveTournament_shouldThrowException_whenNameIsNull() {
@@ -138,7 +162,7 @@ class TournamentServiceTest {
         );
 
         verify(tournamentRepository, never())
-                .save(any(Tournament.class));
+                .save(any(TournamentDomain.class));
     }
 
     @Test
@@ -159,7 +183,7 @@ class TournamentServiceTest {
         );
 
         verify(tournamentRepository, never())
-                .save(any(Tournament.class));
+                .save(any(TournamentDomain.class));
     }
 
     @Test
@@ -180,7 +204,7 @@ class TournamentServiceTest {
         );
 
         verify(tournamentRepository, never())
-                .save(any(Tournament.class));
+                .save(any(TournamentDomain.class));
     }
 
     // getAllTournament  ----------------------------------------------------------------------------------------------------
@@ -188,10 +212,10 @@ class TournamentServiceTest {
     @Test
     void getAllTournaments_shouldReturnAllTournaments() {
         // arrange
-        Users organiser = new Users();
+        UserDomain organiser = new UserDomain();
         organiser.setUsername("organiserUno");
 
-        Tournament tournament1 = new Tournament();
+        TournamentDomain tournament1 = new TournamentDomain();
         tournament1.setId(1L);
         tournament1.setName("Tournament1");
         tournament1.setMaxCapacity(8);
@@ -204,7 +228,7 @@ class TournamentServiceTest {
         tournament1.setRoundDurationHours(48);
         tournament1.setOrganiser(organiser);
 
-        Tournament tournament2 = new Tournament();
+        TournamentDomain tournament2 = new TournamentDomain();
         tournament2.setId(2L);
         tournament2.setName("Tournament2");
         tournament2.setMaxCapacity(8);
@@ -262,7 +286,7 @@ class TournamentServiceTest {
         );
 
         when(tournamentRepository.findById(1L))
-                .thenReturn(expected);
+                .thenReturn(Optional.of(expected));
         // acts
         TournamentDomain actual = tournamentService.getTournamentById(1L);
         // asserts
@@ -290,7 +314,7 @@ class TournamentServiceTest {
         // arrange
         Long tournamentId = 1L;
 
-        Tournament tournament = new Tournament(
+        TournamentDomain tournament = new TournamentDomain(
                 "Tournament 1",
                 null,
                 8,
@@ -329,7 +353,7 @@ class TournamentServiceTest {
     void updateTournament_shouldUpdateAndReturnTournament() {
         Long tournamentId = 1L;
 
-        Tournament existingTournament = new Tournament(
+        TournamentDomain existingTournament = new TournamentDomain(
                 "Tournament 1",
                 null,
                 8,
@@ -371,10 +395,10 @@ class TournamentServiceTest {
     @Test
     void getAllOpenRegistrationTournaments_shouldReturnOpenTournaments() {
         // Arrange
-        Users organiser = new Users();
+        UserDomain organiser = new UserDomain();
         organiser.setUsername("organiserUno");
 
-        Tournament tournament1 = new Tournament();
+        TournamentDomain tournament1 = new TournamentDomain();
         tournament1.setId(1L);
         tournament1.setName("Tournament1");
         tournament1.setMaxCapacity(8);
@@ -387,7 +411,7 @@ class TournamentServiceTest {
         tournament1.setRoundDurationHours(48);
         tournament1.setOrganiser(organiser);
 
-        Tournament tournament2 = new Tournament();
+        TournamentDomain tournament2 = new TournamentDomain();
         tournament2.setId(2L);
         tournament2.setName("Tournament2");
         tournament2.setMaxCapacity(16);
@@ -432,33 +456,5 @@ class TournamentServiceTest {
         // Assert
         assertEquals(expected, actual);
     }
-
-    @Test
-    void shouldMapTournamentEntityToDomain() {
-        Users organiser = new Users(
-                "organiser1",
-                "organiser@test.com",
-                "hash"
-        );
-
-        Tournament entity = new Tournament(
-                "Valorant Cup",
-                organiser,
-                16,
-                LocalDateTime.now().plusDays(2),
-                LocalDateTime.now().plusDays(3),
-                2
-        );
-
-        UserMapper userMapper = new UserMapper();
-        TournamentMapper mapper = new TournamentMapper(userMapper);
-
-        TournamentDomain domain = mapper.toDomain(entity);
-
-        assertEquals("Valorant Cup", domain.getName());
-        assertEquals(16, domain.getMaxCapacity());
-        assertEquals("organiser1", domain.getOrganiser().getUsername());
-    }
-
 }
 

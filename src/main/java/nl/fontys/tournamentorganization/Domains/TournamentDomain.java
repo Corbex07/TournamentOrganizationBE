@@ -49,6 +49,10 @@ public class TournamentDomain {
         );
     }
 
+    public TournamentDomain() {
+
+    }
+
     public Long getId() {
         return id;
     }

@@ -32,6 +32,10 @@ public class UserDomain {
         );
     }
 
+    public UserDomain() {
+
+    }
+
     public Long getId() {
         return id;
     }

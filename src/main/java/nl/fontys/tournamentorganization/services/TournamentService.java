@@ -9,6 +9,7 @@ import nl.fontys.tournamentorganization.Mappers.TournamentDtoMapper;
 import nl.fontys.tournamentorganization.Mappers.TournamentMapper;
 import nl.fontys.tournamentorganization.Mappers.UserMapper;
 import nl.fontys.tournamentorganization.Repositories.Interfaces.TournamentRepository;
+import nl.fontys.tournamentorganization.Repositories.Interfaces.UserRepository;
 import nl.fontys.tournamentorganization.Repositories.Jpa.JpaTournamentRepository;
 import nl.fontys.tournamentorganization.Repositories.Jpa.JpaUserRepository;
 import nl.fontys.tournamentorganization.models.Tournament;
@@ -23,27 +24,20 @@ import java.util.List;
 @Service
 public class TournamentService {
 
-    private final JpaTournamentRepository jpaTournamentRepository;
 
     private final TournamentRepository tournamentRepository;
 
-    private final JpaUserRepository userRepository;
+    private final UserRepository userRepository;
 
     private final TournamentDtoMapper tournamentDtoMapper;
 
-    private final UserMapper userMapper;
 
-
-    public TournamentService(JpaTournamentRepository jpaTournamentRepository,
-                             JpaUserRepository userRepository,
+    public TournamentService(UserRepository userRepository,
                              TournamentRepository tournamentRepository,
-                             TournamentDtoMapper dtoMapper,
-                             UserMapper userMapper) {
-        this.jpaTournamentRepository = jpaTournamentRepository;
+                             TournamentDtoMapper dtoMapper) {
         this.userRepository = userRepository;
         this.tournamentRepository = tournamentRepository;
         this.tournamentDtoMapper = dtoMapper;
-        this.userMapper = userMapper;
     }
 
     public List<TournamentResponseDTO> getAllTournaments() {
@@ -56,7 +50,10 @@ public class TournamentService {
     public TournamentDomain getTournamentById(Long id) {
         return tournamentRepository.findById(id)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Tournament not found")
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Tournament not found"
+                        )
                 );
     }
 
@@ -76,12 +73,10 @@ public class TournamentService {
                 dto.roundDurationHours());
 
         // done manually due to not having implemented users yet.
-        Users organiserEntity = userRepository.findById(1L)
+        UserDomain organiser = userRepository.findById(1L)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Organiser not found")
                 );
-
-        UserDomain organiser = userMapper.toDomain(organiserEntity);
 
 
         TournamentDomain tournament =
