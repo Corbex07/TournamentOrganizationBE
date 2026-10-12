@@ -4,9 +4,13 @@ import nl.fontys.tournamentorganization.DTOs.Tournament.CreateTournamentRequestD
 import nl.fontys.tournamentorganization.DTOs.Tournament.UpdateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.DTOs.Tournament.TournamentResponseDTO;
 import nl.fontys.tournamentorganization.Domains.TournamentDomain;
+import nl.fontys.tournamentorganization.Domains.UserDomain;
+import nl.fontys.tournamentorganization.Mappers.TournamentDtoMapper;
 import nl.fontys.tournamentorganization.Mappers.TournamentMapper;
-import nl.fontys.tournamentorganization.interfaces.ITournamentRepository;
-import nl.fontys.tournamentorganization.interfaces.IUserRepository;
+import nl.fontys.tournamentorganization.Mappers.UserMapper;
+import nl.fontys.tournamentorganization.Repositories.Interfaces.TournamentRepository;
+import nl.fontys.tournamentorganization.Repositories.Jpa.JpaTournamentRepository;
+import nl.fontys.tournamentorganization.Repositories.Jpa.JpaUserRepository;
 import nl.fontys.tournamentorganization.models.Tournament;
 import nl.fontys.tournamentorganization.models.Users;
 import org.springframework.http.HttpStatus;
@@ -19,54 +23,47 @@ import java.util.List;
 @Service
 public class TournamentService {
 
-    private final ITournamentRepository tournamentRepository;
+    private final JpaTournamentRepository jpaTournamentRepository;
 
-    private final IUserRepository userRepository;
+    private final TournamentRepository tournamentRepository;
 
-    private final TournamentMapper tournamentMapper;
+    private final JpaUserRepository userRepository;
 
-    public TournamentService(ITournamentRepository tournamentRepository,
-                             IUserRepository userRepository,
-                             TournamentMapper tournamentMapper) {
-        this.tournamentRepository = tournamentRepository;
+    private final TournamentDtoMapper tournamentDtoMapper;
+
+    private final UserMapper userMapper;
+
+
+    public TournamentService(JpaTournamentRepository jpaTournamentRepository,
+                             JpaUserRepository userRepository,
+                             TournamentRepository tournamentRepository,
+                             TournamentDtoMapper dtoMapper,
+                             UserMapper userMapper) {
+        this.jpaTournamentRepository = jpaTournamentRepository;
         this.userRepository = userRepository;
-        this.tournamentMapper = tournamentMapper;
+        this.tournamentRepository = tournamentRepository;
+        this.tournamentDtoMapper = dtoMapper;
+        this.userMapper = userMapper;
     }
 
     public List<TournamentResponseDTO> getAllTournaments() {
         return tournamentRepository.findAll()
                 .stream()
-                .map(tournament -> new TournamentResponseDTO(
-                        tournament.getId(),
-                        tournament.getName(),
-                        tournament.getMaxCapacity(),
-                        tournament.getRegistrationDeadline(),
-                        tournament.getStartDate(),
-                        tournament.getRoundDurationHours(),
-                        tournament.getOrganiser().getUsername()
-                ))
+                .map(tournamentDtoMapper::toResponseDto)
                 .toList();
     }
 
     public TournamentDomain getTournamentById(Long id) {
-        Tournament entity = tournamentRepository.findById(id)
-                .orElseThrow();
-
-        return tournamentMapper.toDomain(entity);
+        return tournamentRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Tournament not found")
+                );
     }
 
 
     public TournamentResponseDTO getTournamentResponseById(Long id) {
-        TournamentDomain tournament = getTournamentById(id);
-
-        return new TournamentResponseDTO(
-                tournament.getId(),
-                tournament.getName(),
-                tournament.getMaxCapacity(),
-                tournament.getRegistrationDeadline(),
-                tournament.getStartDate(),
-                tournament.getRoundDurationHours(),
-                tournament.getOrganiser().getUsername()
+        return tournamentDtoMapper.toResponseDto(
+                getTournamentById(id)
         );
     }
 
@@ -77,20 +74,18 @@ public class TournamentService {
                 dto.registrationDeadline(),
                 dto.startDate(),
                 dto.roundDurationHours());
+
         // done manually due to not having implemented users yet.
-        Users organiser = userRepository.findById(1L)
+        Users organiserEntity = userRepository.findById(1L)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Organiser not found")
                 );
 
-        Tournament tournament = new Tournament(
-                dto.name(),
-                organiser,
-                dto.maxCapacity(),
-                dto.registrationDeadline(),
-                dto.startDate(),
-                dto.roundDurationHours()
-        );
+        UserDomain organiser = userMapper.toDomain(organiserEntity);
+
+
+        TournamentDomain tournament =
+                tournamentDtoMapper.fromCreateDto(dto, organiser);
 
         tournamentRepository.save(tournament);
     }
@@ -152,49 +147,26 @@ public class TournamentService {
                 dto.startDate(),
                 dto.roundDurationHours());
 
-        Tournament tournament = tournamentRepository.findById(id)
+        TournamentDomain tournament = tournamentRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
                                 "Tournament not found"
                         )
                 );
+        tournamentDtoMapper.updateDomainFromDto(tournament, dto);
 
-        tournament.setName(dto.name());
-        tournament.setMaxCapacity(dto.maxCapacity());
-        tournament.setRegistrationDeadline(dto.registrationDeadline());
-        tournament.setStartDate(dto.startDate());
-        tournament.setRoundDurationHours(dto.roundDurationHours());
+        TournamentDomain updatedTournament =
+                tournamentRepository.save(tournament);
 
-        Tournament updatedTournament = tournamentRepository.save(tournament);
-
-        return new UpdateTournamentRequestDTO(
-                updatedTournament.getName(),
-                updatedTournament.getMaxCapacity(),
-                updatedTournament.getRegistrationDeadline(),
-                updatedTournament.getStartDate(),
-                updatedTournament.getRoundDurationHours()
-        );
+        return tournamentDtoMapper.toUpdateDto(updatedTournament);
     }
 
     public List<TournamentResponseDTO> getAllOpenRegistrationTournaments() {
-        return tournamentRepository
-                .findByRegistrationDeadlineAfter(LocalDateTime.now())
+        return tournamentRepository.findByRegistrationDeadlineAfter(LocalDateTime.now())
                 .stream()
-                .map(this::toResponseDTO)
+                .map(tournamentDtoMapper::toResponseDto)
                 .toList();
-    }
-
-    private TournamentResponseDTO toResponseDTO(Tournament tournament) {
-        return new TournamentResponseDTO(
-                tournament.getId(),
-                tournament.getName(),
-                tournament.getMaxCapacity(),
-                tournament.getRegistrationDeadline(),
-                tournament.getStartDate(),
-                tournament.getRoundDurationHours(),
-                tournament.getOrganiser().getUsername()
-        );
     }
 }
 

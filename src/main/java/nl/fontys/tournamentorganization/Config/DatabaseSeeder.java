@@ -1,7 +1,7 @@
 package nl.fontys.tournamentorganization.Config;
 
-import nl.fontys.tournamentorganization.interfaces.ITournamentRepository;
-import nl.fontys.tournamentorganization.interfaces.IUserRepository;
+import nl.fontys.tournamentorganization.Repositories.Jpa.JpaTournamentRepository;
+import nl.fontys.tournamentorganization.Repositories.Jpa.JpaUserRepository;
 import nl.fontys.tournamentorganization.models.Tournament;
 import nl.fontys.tournamentorganization.models.Users;
 
@@ -14,13 +14,13 @@ import java.util.List;
 @Component
 public class DatabaseSeeder implements CommandLineRunner {
 
-    private final IUserRepository userRepository;
+    private final JpaUserRepository userRepository;
 
-    private final ITournamentRepository tournamentRepository;
+    private final JpaTournamentRepository tournamentRepository;
 
     public DatabaseSeeder(
-            IUserRepository userRepository,
-            ITournamentRepository tournamentRepository) {
+            JpaUserRepository userRepository,
+            JpaTournamentRepository tournamentRepository) {
         this.userRepository = userRepository;
         this.tournamentRepository = tournamentRepository;
     }

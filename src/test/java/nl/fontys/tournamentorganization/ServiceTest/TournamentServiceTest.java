@@ -6,8 +6,8 @@ import nl.fontys.tournamentorganization.DTOs.Tournament.UpdateTournamentRequestD
 import nl.fontys.tournamentorganization.Domains.TournamentDomain;
 import nl.fontys.tournamentorganization.Mappers.TournamentMapper;
 import nl.fontys.tournamentorganization.Mappers.UserMapper;
-import nl.fontys.tournamentorganization.interfaces.ITournamentRepository;
-import nl.fontys.tournamentorganization.interfaces.IUserRepository;
+import nl.fontys.tournamentorganization.Repositories.Jpa.JpaTournamentRepository;
+import nl.fontys.tournamentorganization.Repositories.Jpa.JpaUserRepository;
 import nl.fontys.tournamentorganization.models.Tournament;
 import nl.fontys.tournamentorganization.models.Users;
 import nl.fontys.tournamentorganization.services.TournamentService;
@@ -33,10 +33,10 @@ import static org.mockito.Mockito.*;
 class TournamentServiceTest {
 
     @Mock
-    private ITournamentRepository tournamentRepository;
+    private JpaTournamentRepository tournamentRepository;
 
     @Mock
-    private IUserRepository userRepository;
+    private JpaUserRepository userRepository;
 
     @InjectMocks
     private TournamentService tournamentService;

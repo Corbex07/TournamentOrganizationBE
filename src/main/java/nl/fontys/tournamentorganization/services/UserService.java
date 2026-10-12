@@ -2,16 +2,15 @@ package nl.fontys.tournamentorganization.services;
 
 import nl.fontys.tournamentorganization.DTOs.ApiMessage;
 import nl.fontys.tournamentorganization.DTOs.User.UserRegistrationRequestDTO;
-import nl.fontys.tournamentorganization.interfaces.ITournamentRepository;
-import nl.fontys.tournamentorganization.interfaces.IUserRepository;
+import nl.fontys.tournamentorganization.Repositories.Jpa.JpaUserRepository;
 import nl.fontys.tournamentorganization.models.Users;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
-    private final IUserRepository userRepository;
+    private final JpaUserRepository userRepository;
 
-    public UserService(IUserRepository userRepository) {
+    public UserService(JpaUserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
