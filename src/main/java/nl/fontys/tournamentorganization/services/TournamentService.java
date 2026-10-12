@@ -3,6 +3,8 @@ package nl.fontys.tournamentorganization.services;
 import nl.fontys.tournamentorganization.DTOs.Tournament.CreateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.DTOs.Tournament.UpdateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.DTOs.Tournament.TournamentResponseDTO;
+import nl.fontys.tournamentorganization.Domains.TournamentDomain;
+import nl.fontys.tournamentorganization.Mappers.TournamentMapper;
 import nl.fontys.tournamentorganization.interfaces.ITournamentRepository;
 import nl.fontys.tournamentorganization.interfaces.IUserRepository;
 import nl.fontys.tournamentorganization.models.Tournament;
@@ -21,9 +23,14 @@ public class TournamentService {
 
     private final IUserRepository userRepository;
 
-    public TournamentService(ITournamentRepository tournamentRepository, IUserRepository userRepository) {
+    private final TournamentMapper tournamentMapper;
+
+    public TournamentService(ITournamentRepository tournamentRepository,
+                             IUserRepository userRepository,
+                             TournamentMapper tournamentMapper) {
         this.tournamentRepository = tournamentRepository;
         this.userRepository = userRepository;
+        this.tournamentMapper = tournamentMapper;
     }
 
     public List<TournamentResponseDTO> getAllTournaments() {
@@ -41,19 +48,16 @@ public class TournamentService {
                 .toList();
     }
 
-    public Tournament getTournamentById(Long id) {
-        return tournamentRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Tournament not found"
-                        )
-                );
+    public TournamentDomain getTournamentById(Long id) {
+        Tournament entity = tournamentRepository.findById(id)
+                .orElseThrow();
+
+        return tournamentMapper.toDomain(entity);
     }
 
 
     public TournamentResponseDTO getTournamentResponseById(Long id) {
-        Tournament tournament = getTournamentById(id);
+        TournamentDomain tournament = getTournamentById(id);
 
         return new TournamentResponseDTO(
                 tournament.getId(),

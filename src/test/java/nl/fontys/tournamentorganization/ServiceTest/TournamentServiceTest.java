@@ -3,6 +3,9 @@ package nl.fontys.tournamentorganization.ServiceTest;
 import nl.fontys.tournamentorganization.DTOs.Tournament.CreateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.DTOs.Tournament.TournamentResponseDTO;
 import nl.fontys.tournamentorganization.DTOs.Tournament.UpdateTournamentRequestDTO;
+import nl.fontys.tournamentorganization.Domains.TournamentDomain;
+import nl.fontys.tournamentorganization.Mappers.TournamentMapper;
+import nl.fontys.tournamentorganization.Mappers.UserMapper;
 import nl.fontys.tournamentorganization.interfaces.ITournamentRepository;
 import nl.fontys.tournamentorganization.interfaces.IUserRepository;
 import nl.fontys.tournamentorganization.models.Tournament;
@@ -249,7 +252,7 @@ class TournamentServiceTest {
     @Test
     void getTournamentById_shouldReturnTournament_whenTournamentExists() {
         // arrange
-        Tournament expected = new Tournament(
+        TournamentDomain expected = new TournamentDomain(
                 "Tournament 1",
                 null,
                 8,
@@ -259,9 +262,9 @@ class TournamentServiceTest {
         );
 
         when(tournamentRepository.findById(1L))
-                .thenReturn(Optional.of(expected));
+                .thenReturn(expected);
         // acts
-        Tournament actual = tournamentService.getTournamentById(1L);
+        TournamentDomain actual = tournamentService.getTournamentById(1L);
         // asserts
         assertEquals(expected, actual);
     }
@@ -428,6 +431,33 @@ class TournamentServiceTest {
 
         // Assert
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void shouldMapTournamentEntityToDomain() {
+        Users organiser = new Users(
+                "organiser1",
+                "organiser@test.com",
+                "hash"
+        );
+
+        Tournament entity = new Tournament(
+                "Valorant Cup",
+                organiser,
+                16,
+                LocalDateTime.now().plusDays(2),
+                LocalDateTime.now().plusDays(3),
+                2
+        );
+
+        UserMapper userMapper = new UserMapper();
+        TournamentMapper mapper = new TournamentMapper(userMapper);
+
+        TournamentDomain domain = mapper.toDomain(entity);
+
+        assertEquals("Valorant Cup", domain.getName());
+        assertEquals(16, domain.getMaxCapacity());
+        assertEquals("organiser1", domain.getOrganiser().getUsername());
     }
 
 }
