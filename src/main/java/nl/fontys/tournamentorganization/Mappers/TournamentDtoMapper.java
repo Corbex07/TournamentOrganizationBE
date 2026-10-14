@@ -5,7 +5,9 @@ import nl.fontys.tournamentorganization.DTOs.Tournament.TournamentResponseDTO;
 import nl.fontys.tournamentorganization.DTOs.Tournament.UpdateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.Domains.TournamentDomain;
 import nl.fontys.tournamentorganization.Domains.UserDomain;
+import org.springframework.stereotype.Component;
 
+@Component
 public class TournamentDtoMapper {
 
     public TournamentResponseDTO toResponseDto(TournamentDomain tournament) {
