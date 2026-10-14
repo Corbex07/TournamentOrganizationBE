@@ -6,6 +6,7 @@ import nl.fontys.tournamentorganization.Mappers.UserMapper;
 import nl.fontys.tournamentorganization.Repositories.Interfaces.UserRepository;
 import nl.fontys.tournamentorganization.Repositories.Jpa.JpaTournamentRepository;
 import nl.fontys.tournamentorganization.Repositories.Jpa.JpaUserRepository;
+import nl.fontys.tournamentorganization.models.Users;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -29,5 +30,25 @@ public class UserRepositoryImpl implements UserRepository {
         return jpaRepository.findById(id)
                 .map(userMapper::toDomain);
 
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return jpaRepository.existsByEmail(email);
+    }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        return jpaRepository.existsByUsername(username);
+    }
+
+    @Override
+    public UserDomain save(UserDomain user) {
+
+        Users entity = userMapper.toEntity(user);
+
+        Users savedEntity = jpaRepository.save(entity);
+
+        return userMapper.toDomain(savedEntity);
     }
 }
