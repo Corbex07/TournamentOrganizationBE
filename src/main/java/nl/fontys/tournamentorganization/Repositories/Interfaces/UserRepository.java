@@ -11,9 +11,12 @@ public interface UserRepository {
 
     Optional<UserDomain> findById(Long id);
 
+    Optional<UserDomain> findByUsername(String username);
+
     boolean existsByEmail(@NotBlank(message = "Email is required") @Email(message = "Email must be valid") String email);
 
     boolean existsByUsername(String username);
 
     UserDomain save(UserDomain user);
+
 }

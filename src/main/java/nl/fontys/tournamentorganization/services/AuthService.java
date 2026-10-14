@@ -1,5 +1,6 @@
 package nl.fontys.tournamentorganization.services;
 
+import nl.fontys.tournamentorganization.DTOs.User.UserLoginRequestDTO;
 import nl.fontys.tournamentorganization.DTOs.User.UserRegistrationRequestDTO;
 import nl.fontys.tournamentorganization.Domains.UserDomain;
 import nl.fontys.tournamentorganization.Repositories.Interfaces.UserRepository;
@@ -45,6 +46,28 @@ public class AuthService {
         );
 
         userRepository.save(userDomain);
+    }
+
+    public UserDomain authenticate(UserLoginRequestDTO requestDTO) {
+
+        UserDomain user = userRepository
+                .findByUsername(requestDTO.username())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "Invalid username or password"
+                ));
+
+        if (!passwordEncoder.matches(
+                requestDTO.password(),
+                user.getPasswordHash())) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Invalid username or password"
+            );
+        }
+
+        return user;
     }
 
 
