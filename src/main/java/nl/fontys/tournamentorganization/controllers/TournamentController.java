@@ -1,5 +1,6 @@
 package nl.fontys.tournamentorganization.controllers;
 
+import jakarta.validation.Valid;
 import nl.fontys.tournamentorganization.DTOs.Tournament.CreateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.DTOs.Tournament.TournamentResponseDTO;
 import nl.fontys.tournamentorganization.DTOs.Tournament.UpdateTournamentRequestDTO;
@@ -33,7 +34,7 @@ public class TournamentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createTournament(@RequestBody CreateTournamentRequestDTO createTournamentRequestDTO) {
+    public void createTournament(@Valid @RequestBody CreateTournamentRequestDTO createTournamentRequestDTO) {
         tournamentService.createTournament(createTournamentRequestDTO);
     }
 
@@ -50,8 +51,7 @@ public class TournamentController {
 
     @PutMapping("/{id}")
     public void updateTournament(
-            @PathVariable Long id,
-            @RequestBody UpdateTournamentRequestDTO updateTournamentRequestDTO) {
+            @PathVariable Long id, @Valid @RequestBody UpdateTournamentRequestDTO updateTournamentRequestDTO) {
 
         tournamentService.updateTournament(id, updateTournamentRequestDTO);
     }
