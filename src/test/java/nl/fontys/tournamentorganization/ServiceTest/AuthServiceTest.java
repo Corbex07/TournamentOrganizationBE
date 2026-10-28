@@ -1,9 +1,9 @@
 package nl.fontys.tournamentorganization.ServiceTest;
 
-import nl.fontys.tournamentorganization.DTOs.User.UserLoginRequestDTO;
-import nl.fontys.tournamentorganization.Domains.UserDomain;
-import nl.fontys.tournamentorganization.Repositories.Interfaces.UserRepository;
-import nl.fontys.tournamentorganization.services.AuthService;
+import nl.fontys.tournamentorganization.Api.DTOs.User.UserLoginRequestDTO;
+import nl.fontys.tournamentorganization.bll.Domains.UserDomain;
+import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.UserRepository;
+import nl.fontys.tournamentorganization.bll.services.AuthService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
