@@ -52,7 +52,7 @@ sonar {
     properties {
         property "sonar.projectKey", "Corbex07_TournamentOrganizationBE"
         property "sonar.projectName", "TournamentOrganizationBE"
-        property "sonar.organization", "Corbex07"
+        property "sonar.organization", "corbex07"
         property "sonar.host.url", "https://sonarcloud.io"
     }
 }
