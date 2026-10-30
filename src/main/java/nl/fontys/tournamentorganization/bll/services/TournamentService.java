@@ -115,6 +115,17 @@ public class TournamentService {
             LocalDateTime startDate
     )
     {
+        if (registrationDeadline == null) {
+            throw new IllegalArgumentException(
+                    "Registration deadline cannot be null"
+            );
+        }
+
+        if (startDate == null) {
+            throw new IllegalArgumentException(
+                    "Start date cannot be null"
+            );
+        }
         if (!registrationDeadline.isBefore(startDate)) {
             throw new IllegalArgumentException(
                     "Registration deadline must be before tournament start"
