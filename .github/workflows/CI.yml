@@ -108,6 +108,30 @@ jobs:
             build/reports/jacoco/test/jacocoTestReport.xml
           if-no-files-found: error
 
+      - name: Verify JaCoCo coverage
+        run: |
+          echo "Checking downloaded files..."
+
+          ls -R build/reports/jacoco/
+          ls -R build/classes/java/main/
+
+          test -f build/reports/jacoco/test/jacocoTestReport.xml
+
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+
+          path = "build/reports/jacoco/test/jacocoTestReport.xml"
+          root = ET.parse(path).getroot()
+
+          counter = next(
+              c for c in root.findall("counter")
+              if c.get("type") == "LINE"
+          )
+
+          print("Covered lines:", counter.get("covered"))
+          print("Missed lines:", counter.get("missed"))
+          PY
+
   sonarqube:
     runs-on: ubuntu-latest
     needs: test  # ensures tests + coverage ran first
