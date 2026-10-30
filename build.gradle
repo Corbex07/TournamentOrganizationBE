@@ -50,8 +50,9 @@ tasks.named('checkstyleTest') {
 
 sonar {
     properties {
-        property "sonar.projectKey", "valorant-tournament-backend"
-        property "sonar.projectName", "Valorant Tournament Backend"
+        property "sonar.projectKey", "Corbex07_TournamentOrganizationBE"
+        property "sonar.projectName", "TournamentOrganizationBE"
+        property "sonar.organization", "Corbex07"
         property "sonar.host.url", "https://sonarcloud.io"
     }
 }

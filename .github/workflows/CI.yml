@@ -136,7 +136,7 @@ jobs:
       - name: Run SonarQube analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew sonar -x test
+        run: ./gradlew sonar -x test --info --stacktrace
 
   lint:
     needs: test
