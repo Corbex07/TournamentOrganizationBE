@@ -1,26 +1,54 @@
-services:
 
+services:
   database:
     image: postgres:17
     environment:
       POSTGRES_DB: tournament_organization_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Gonretblux2
-    ports:
-      - "5432:5432"
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - source: tournament_db_password
+        target: db_password
     volumes:
       - tournament-data:/var/lib/postgresql/data
+    networks:
+      - ziggy-network
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: any
 
   backend:
-    build: .
+    image: ghcr.io/Corbex07/TournamentOrganizationBE:latest
     ports:
       - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/tournament_organization_db
       SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: Gonretblux2
-    depends_on:
-      - database
+      SPRING_CONFIG_IMPORT: configtree:/run/secrets/
+    secrets:
+      - source: tournament_db_password
+        target: spring.datasource.password
+    networks:
+      - ziggys-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        order: stop-first
+
+networks:
+  ziggys-network:
+    driver: overlay
 
 volumes:
   tournament-data:
+
+secrets:
+  tournament_db_password:
+    external: true
