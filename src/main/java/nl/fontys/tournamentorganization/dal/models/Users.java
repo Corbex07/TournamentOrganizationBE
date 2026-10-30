@@ -49,9 +49,9 @@ public class Users {
         this.username = username;
     }
 
-    public void setEmail(String email) {this.email = email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public void setPasswordHash (String passwordHash) {this.passwordHash = passwordHash; }
+    public void setPasswordHash (String passwordHash) { this.passwordHash = passwordHash; }
 
     public void setId(Long id) { this.id = id; }
 }

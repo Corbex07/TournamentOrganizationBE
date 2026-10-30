@@ -3,8 +3,11 @@ package nl.fontys.tournamentorganization.bll.Domains;
 public class UserDomain {
 
     private Long id;
+
     private String username;
+
     private String email;
+
     private String passwordHash;
 
     public UserDomain(

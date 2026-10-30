@@ -13,6 +13,7 @@ import java.util.Optional;
 public class UserRepositoryImpl implements UserRepository {
 
     private final JpaUserRepository jpaRepository;
+
     private final UserMapper userMapper;
 
     public UserRepositoryImpl(

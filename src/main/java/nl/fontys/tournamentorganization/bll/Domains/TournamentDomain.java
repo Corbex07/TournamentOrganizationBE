@@ -5,11 +5,17 @@ import java.time.LocalDateTime;
 public class TournamentDomain {
 
     private Long id;
+
     private String name;
+
     private UserDomain organiser;
+
     private Integer maxCapacity;
+
     private LocalDateTime registrationDeadline;
+
     private LocalDateTime startDate;
+
     private Integer roundDurationHours;
 
     public TournamentDomain(

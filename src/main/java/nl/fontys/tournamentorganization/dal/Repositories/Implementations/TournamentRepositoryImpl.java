@@ -15,6 +15,7 @@ import java.util.Optional;
 public class TournamentRepositoryImpl implements TournamentRepository {
 
     private final JpaTournamentRepository jpaRepository;
+
     private final TournamentMapper tournamentMapper;
 
     public TournamentRepositoryImpl(
