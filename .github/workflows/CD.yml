@@ -62,71 +62,69 @@ jobs:
           docker push "$IMAGE:cd-testing"
           docker push "$IMAGE:$COMMIT_SHA"
 
+
   deploy:
-    runs-on: ubuntu-latest
+    name: Deploy to personal server
+
+    needs: build-docker-image
+
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'CD-testing' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+
+    runs-on: [ self-hosted, linux, x64, tournament-deploy ]
+
+    permissions:
+      contents: read
+      packages: read
+
+    concurrency:
+      group: tournament-staging-deployment
+      cancel-in-progress: false
 
     steps:
-      - name: Prepare SSH
-        env:
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-          VM_HOST: ${{ secrets.VM_HOST }}
-        run: |
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-
-      - name: Checkout repository
+      - name: Checkout tested commit
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
 
-      - name: Deploy Docker
+      - name: Deploy with Docker Compose
         env:
-          VM_HOST: ${{ secrets.VM_HOST }}
-          VM_USER: ${{ secrets.VM_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: |
-          ssh -T "$VM_USER@$VM_HOST" \
-            "sudo -n docker stack deploy \
-            --with-registry-auth \
-            -c - tournament" < docker-compose.yml
-
-      - name: Deploy Docker Compose
-        env:
-          VM_HOST: ${{ secrets.VM_HOST }}
-          VM_USER: ${{ secrets.VM_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GHCR_USER: ${{ github.actor }}
+          IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
 
         run: |
           set -euo pipefail
-      
-          # Check that database password exists
+
+          # Verify required secrets exist
           test -n "$DB_PASSWORD"
-      
-          # Create project directory on server
-          ssh -T "$VM_USER@$VM_HOST" \
-            'mkdir -p "$HOME/tournament"'
-      
-          # Copy Compose file to server
-          scp docker-compose.yml \
-            "$VM_USER@$VM_HOST:tournament/docker-compose.yml"
-      
-          # Authenticate server with GHCR
-          printf '%s\n' "$GHCR_TOKEN" |
-            ssh -T "$VM_USER@$VM_HOST" \
-              "docker login ghcr.io -u '$GHCR_USER' --password-stdin"
-      
-          # Pass DB password securely and deploy
-          printf '%s\n' "$DB_PASSWORD" |
-            ssh -T "$VM_USER@$VM_HOST" '
-              set -eu
-              IFS= read -r DB_PASSWORD
-              export DB_PASSWORD
-      
-              cd "$HOME/tournament"
-              docker compose up -d --pull always
-              docker compose ps
-            '
+          test -n "$GHCR_TOKEN"
+
+          # Keep registry login credentials temporary
+          export DOCKER_CONFIG
+          DOCKER_CONFIG="$(mktemp -d)"
+          trap 'rm -rf "$DOCKER_CONFIG"' EXIT
+
+          # Authenticate to GHCR
+          printf '%s' "$GHCR_TOKEN" |
+            docker login ghcr.io \
+              --username "$GHCR_USER" \
+              --password-stdin
+
+          # Start/update the application
+          docker compose \
+            -p tournament \
+            -f docker-compose.yml \
+            up -d --pull always --no-build
+
+          # Show running containers
+          docker compose \
+            -p tournament \
+            -f docker-compose.yml \
+            ps
+  
