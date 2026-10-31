@@ -11,8 +11,6 @@ services:
         target: db_password
     volumes:
       - tournament-data:/var/lib/postgresql/data
-    networks:
-      ziggys-network:
     deploy:
       replicas: 1
       placement:
@@ -32,8 +30,6 @@ services:
     secrets:
       - source: tournament_db_password
         target: spring.datasource.password
-    networks:
-      -
     deploy:
       replicas: 1
       restart_policy:
@@ -41,10 +37,6 @@ services:
       update_config:
         parallelism: 1
         order: stop-first
-
-networks:
-  ziggys-network:
-    driver: overlay
 
 volumes:
   tournament-data:
