@@ -43,4 +43,4 @@ volumes:
 
 secrets:
   tournament_db_password:
-    external: true
+    environment: DB_PASSWORD
