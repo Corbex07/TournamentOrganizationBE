@@ -76,37 +76,57 @@ jobs:
           printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
-      - name: Recreate Swarm secret
-        env:
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          VM_HOST: ${{ secrets.VM_HOST }}
-          VM_USER: ${{ secrets.VM_USER }}
-
-        # runs with secure bash via set -euo pipefail (e = exit on error, u = undefined are errors o pipefail = catch errors in pipelines
-        run: |
-          set -euo pipefail 
-          test -n "$DB_PASSWORD"
-
-          ssh "$VM_USER@$VM_HOST" \
-            "if sudo -n docker secret inspect tournament_db_password >/dev/null 2>&1; then
-              sudo -n docker secret rm tournament_db_password
-            fi"
-
-          printf '%s' "$DB_PASSWORD" |
-            ssh "$VM_USER@$VM_HOST" \
-              "sudo -n docker secret create tournament_db_password -"
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: Deploy Docker Swarm stack
+      - name: Deploy Docker
         env:
           VM_HOST: ${{ secrets.VM_HOST }}
           VM_USER: ${{ secrets.VM_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
           ssh -T "$VM_USER@$VM_HOST" \
             "sudo -n docker stack deploy \
             --with-registry-auth \
             -c - tournament" < docker-compose.yml
+
+      - name: Deploy Docker Compose
+        env:
+          VM_HOST: ${{ secrets.VM_HOST }}
+          VM_USER: ${{ secrets.VM_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+
+        run: |
+          set -euo pipefail
+          
+          # Check that database password exists
+          test -n "$DB_PASSWORD"
+          
+          # Create project directory on server
+          ssh -T "$VM_USER@$VM_HOST" \
+            'mkdir -p "$HOME/tournament"'
+          
+          # Copy Compose file to server
+          scp docker-compose.yml \
+            "$VM_USER@$VM_HOST:tournament/docker-compose.yml"
+          
+          # Authenticate server with GHCR
+          printf '%s\n' "$GHCR_TOKEN" |
+            ssh -T "$VM_USER@$VM_HOST" \
+              "docker login ghcr.io -u '$GHCR_USER' --password-stdin"
+          
+          # Pass DB password securely and deploy
+          printf '%s\n' "$DB_PASSWORD" |
+            ssh -T "$VM_USER@$VM_HOST" '
+              set -eu
+              IFS= read -r DB_PASSWORD
+              export DB_PASSWORD
+          
+              cd "$HOME/tournament"
+              docker compose up -d --pull always
+              docker compose ps
+            '
