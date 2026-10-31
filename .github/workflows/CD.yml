@@ -4,21 +4,62 @@ on:
   workflow_run:
     workflows: ["Java CI with Gradle"]
     types: [completed]
-    branches: ["main", "CD-testing"]
+    branches: ["CD-testing"]
 
-  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  packages: write
 
 jobs:
-  debug-trigger:
+  build-docker-image:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'CD-testing' &&
+      github.event.workflow_run.event == 'push'
+
     runs-on: ubuntu-latest
 
     steps:
-      - name: Debug workflow trigger
-        env:
-          CI_NAME: ${{ github.event.workflow_run.name }}
-          CI_BRANCH: ${{ github.event.workflow_run.head_branch }}
-          CI_RESULT: ${{ github.event.workflow_run.conclusion }}
+      - uses: actions/checkout@v4
+
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: TournamentOrganizationBE-jar
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ./artifact
+
+      - name: Set image name
         run: |
-          echo "CI workflow: $CI_NAME"
-          echo "CI branch: $CI_BRANCH"
-          echo "CI result: $CI_RESULT"
+          echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        env:
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          docker build \
+            --label "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
+            -t "$IMAGE:cd-testing" \
+            -t "$IMAGE:$COMMIT_SHA" .
+
+      - name: Verify Docker Image
+        run: docker image inspect "$IMAGE:cd-testing"
+
+      - name: Push Docker image to GHCR
+        env:
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          docker push "$IMAGE:cd-testing"
+          docker push "$IMAGE:$COMMIT_SHA"
+
+
