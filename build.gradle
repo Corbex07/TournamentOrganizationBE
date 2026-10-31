@@ -2,6 +2,10 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '4.1.1'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'checkstyle'
+
+    id 'org.sonarqube' version '7.5.0.8588'
+    id 'jacoco'
 }
 
 group = 'nl.fontys'
@@ -22,6 +26,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
@@ -32,4 +38,33 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+tasks.named('bootJar') {
+    archiveFileName = 'app.jar'
+}
+checkstyle {
+    toolVersion = '14.1.0'
+}
+
+tasks.named('checkstyleTest') {
+    enabled = false
+}
+
+sonar {
+    properties {
+        property "sonar.projectKey", "Corbex07_TournamentOrganizationBE"
+        property "sonar.projectName", "TournamentOrganizationBE"
+        property "sonar.organization", "corbex07"
+        property "sonar.host.url", "https://sonarcloud.io"
+    }
+}
+
+jacocoTestReport {
+    dependsOn test
+
+    reports {
+        xml.required = true
+        html.required = true
+    }
 }
