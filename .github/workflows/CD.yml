@@ -55,11 +55,8 @@ jobs:
       - name: Verify Docker Image
         run: docker image inspect "$IMAGE:cd-testing"
 
-      - name: Push Docker image to GHCR
-        env:
-          COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
+      - name: Test GHCR push with new tag
         run: |
-          docker push "$IMAGE:cd-testing"
-          docker push "$IMAGE:$COMMIT_SHA"
-
+          docker tag "$IMAGE:cd-testing" "$IMAGE:debug-$GITHUB_RUN_ID"
+          docker --debug push "$IMAGE:debug-$GITHUB_RUN_ID"
 
