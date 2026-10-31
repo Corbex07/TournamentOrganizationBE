@@ -1,47 +1,68 @@
-name: Deploy
+name: CD
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main", "CD-testing"]
+  pull_request:
+    branches: [ "main", "CD-testing"]
+
+
+permissions:
+  contents: read
+  actions: read
+  packages: write
 
 jobs:
-  deploy:
+  build-docker-image:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'CD-testing' &&
+      github.event.workflow_run.event == 'push'
+
     runs-on: ubuntu-latest
 
     steps:
-      - name: Prepare SSH
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.VM_SSH_PRIVATE_KEY }}
-          VM_HOST: ${{ secrets.VM_HOST }}
+
+      - uses: actions/checkout@v4
+
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: TournamentOrganizationBE-jar
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ./artifact
+
+      - name: Set image name
         run: |
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
+          echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
 
-      - name: Create secret files
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
         env:
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          API_KEY: ${{ secrets.API_KEY }}
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
-          mkdir -p "$RUNNER_TEMP/deploy-secrets"
-          umask 077
-          printf '%s' "$DB_PASSWORD" > "$RUNNER_TEMP/deploy-secrets/db_password.txt"
-          printf '%s' "$API_KEY" > "$RUNNER_TEMP/deploy-secrets/api_key.txt"
+          docker build \
+            --label "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
+            -t "$IMAGE:cd-testing" \
+            -t "$IMAGE:$COMMIT_SHA" .
 
-      - name: Transfer secrets to VM
+      - name: Verify Docker Image
+        run: docker image inspect "$IMAGE:cd-testing"
+
+      - name: Push Docker image to GHCR
         env:
-          VM_HOST: ${{ secrets.VM_HOST }}
-          VM_USER: ${{ secrets.VM_USER }}
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
-          ssh "$VM_USER@$VM_HOST" \
-            "mkdir -p /opt/myapp/secrets"
+          docker push "$IMAGE:cd-testing"
+          docker push "$IMAGE:$COMMIT_SHA"
 
-          scp "$RUNNER_TEMP/deploy-secrets/"*.txt \
-            "$VM_USER@$VM_HOST:/opt/myapp/secrets/"
 
-          ssh "$VM_USER@$VM_HOST" \
-            "chmod 600 /opt/myapp/secrets/*.txt"
 
     

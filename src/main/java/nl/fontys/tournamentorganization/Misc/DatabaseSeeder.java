@@ -2,8 +2,8 @@ package nl.fontys.tournamentorganization.Misc;
 
 import nl.fontys.tournamentorganization.dal.Repositories.Jpa.JpaTournamentRepository;
 import nl.fontys.tournamentorganization.dal.Repositories.Jpa.JpaUserRepository;
-import nl.fontys.tournamentorganization.dal.models.Tournament;
-import nl.fontys.tournamentorganization.dal.models.Users;
+import nl.fontys.tournamentorganization.dal.Entities.Tournament;
+import nl.fontys.tournamentorganization.dal.Entities.Users;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

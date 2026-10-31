@@ -1,6 +1,6 @@
 package nl.fontys.tournamentorganization.dal.Repositories.Jpa;
 
-import nl.fontys.tournamentorganization.dal.models.Users;
+import nl.fontys.tournamentorganization.dal.Entities.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

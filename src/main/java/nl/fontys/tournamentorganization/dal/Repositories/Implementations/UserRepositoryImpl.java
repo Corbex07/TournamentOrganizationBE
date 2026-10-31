@@ -4,7 +4,7 @@ import nl.fontys.tournamentorganization.bll.Domains.UserDomain;
 import nl.fontys.tournamentorganization.dal.Mappers.UserMapper;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.UserRepository;
 import nl.fontys.tournamentorganization.dal.Repositories.Jpa.JpaUserRepository;
-import nl.fontys.tournamentorganization.dal.models.Users;
+import nl.fontys.tournamentorganization.dal.Entities.Users;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;

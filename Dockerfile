@@ -2,7 +2,8 @@ FROM eclipse-temurin:25-jre-jammy
 
 WORKDIR /app
 
-COPY build/libs/app.jar app.jar
+COPY artifact/app.jar app.jar
+
 
 RUN useradd --system --create-home appuser \
     && chown -R appuser:appuser /app

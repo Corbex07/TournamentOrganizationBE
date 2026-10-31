@@ -1,7 +1,7 @@
 package nl.fontys.tournamentorganization.dal.Mappers;
 
 import nl.fontys.tournamentorganization.bll.Domains.UserDomain;
-import nl.fontys.tournamentorganization.dal.models.Users;
+import nl.fontys.tournamentorganization.dal.Entities.Users;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -4,7 +4,7 @@ import nl.fontys.tournamentorganization.bll.Domains.TournamentDomain;
 import nl.fontys.tournamentorganization.dal.Mappers.TournamentMapper;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.TournamentRepository;
 import nl.fontys.tournamentorganization.dal.Repositories.Jpa.JpaTournamentRepository;
-import nl.fontys.tournamentorganization.dal.models.Tournament;
+import nl.fontys.tournamentorganization.dal.Entities.Tournament;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;

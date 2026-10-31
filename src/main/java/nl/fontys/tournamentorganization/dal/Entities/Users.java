@@ -1,4 +1,4 @@
-package nl.fontys.tournamentorganization.dal.models;
+package nl.fontys.tournamentorganization.dal.Entities;
 
 import jakarta.persistence.*;
 
