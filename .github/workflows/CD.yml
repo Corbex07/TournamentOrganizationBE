@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows: ["Java CI with Gradle"]
     types: [completed]
-    branches: ["CD-testing"]
+    branches: ["main"]
 
 
 permissions:
@@ -16,7 +16,7 @@ jobs:
   build-docker-image:
     if: >
       github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'CD-testing' &&
+      github.event.workflow_run.head_branch == 'main' &&
       github.event.workflow_run.event == 'push'
 
     runs-on: ubuntu-latest
@@ -49,17 +49,17 @@ jobs:
         run: |
           docker build \
             --label "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
-            -t "$IMAGE:cd-testing" \
+            -t "$IMAGE:main" \
             -t "$IMAGE:$COMMIT_SHA" .
 
       - name: Verify Docker Image
-        run: docker image inspect "$IMAGE:cd-testing"
+        run: docker image inspect "$IMAGE:main"
 
       - name: Push Docker image to GHCR
         env:
           COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
-          docker push "$IMAGE:cd-testing"
+          docker push "$IMAGE:main"
           docker push "$IMAGE:$COMMIT_SHA"
 
 
@@ -70,7 +70,7 @@ jobs:
 
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'CD-testing' &&
+      github.event.workflow_run.head_branch == 'main' &&
       github.event.workflow_run.event == 'push' &&
       github.event.workflow_run.head_repository.full_name == github.repository
 
