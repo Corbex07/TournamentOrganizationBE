@@ -32,4 +32,42 @@ public class GlobalExceptionHandler {
                         errors
                 ));
     }
+<<<<<<< Updated upstream:src/main/java/nl/fontys/tournamentorganization/Api/Handlers/GlobalExceptionHandler.java
+=======
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(
+            AccessDeniedException ex) {
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of(
+                        "status", 403,
+                        "message", "Access denied"
+                ));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleGeneral(
+            Exception ex) {
+
+        LOGGER.error("Unexpected exception occurred", ex);
+
+        return ResponseEntity.status(
+                HttpStatus.INTERNAL_SERVER_ERROR
+        ).body(Map.of(
+                "status", 500,
+                "message", "Internal server error"
+        ));
+
+
+    }
+
+    @ExceptionHandler(TournamentNotFoundException.class)
+    public ResponseEntity<?> handleNotFound(
+            TournamentNotFoundException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
 }

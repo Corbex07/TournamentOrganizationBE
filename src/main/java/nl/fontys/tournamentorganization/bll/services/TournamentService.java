@@ -3,14 +3,14 @@ package nl.fontys.tournamentorganization.bll.services;
 import nl.fontys.tournamentorganization.Api.DTOs.Tournament.CreateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.Api.DTOs.Tournament.UpdateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.Api.DTOs.Tournament.TournamentResponseDTO;
+import nl.fontys.tournamentorganization.Api.Exceptions.TournamentNotFoundException;
 import nl.fontys.tournamentorganization.bll.Domains.TournamentDomain;
 import nl.fontys.tournamentorganization.bll.Domains.UserDomain;
 import nl.fontys.tournamentorganization.Api.Mappers.TournamentDtoMapper;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.TournamentRepository;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.UserRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,21 +42,18 @@ public class TournamentService {
     }
 
     public TournamentDomain getTournamentById(Long id) {
+
         return tournamentRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Tournament not found"
-                        )
-                );
+                .orElseThrow(() -> new TournamentNotFoundException(id));
     }
 
 
     public TournamentResponseDTO getTournamentResponseById(Long id) {
-        return tournamentDtoMapper.toResponseDto(
-                getTournamentById(id)
-        );
-    }
+
+        return tournamentDtoMapper.toResponseDto(getTournamentById(id));
+
+        }
+
 
     public void createTournament(CreateTournamentRequestDTO dto) {
         validateTournamentDates(
@@ -77,24 +74,20 @@ public class TournamentService {
     }
 
     public void deleteTournament(Long id) {
-            if (tournamentRepository.findById(id).isEmpty()) {
-                throw new IllegalArgumentException("Tournament does not exist");
-            }
-            tournamentRepository.deleteById(id);
-        }
+
+                tournamentRepository.findById(id)
+                .orElseThrow(() -> new TournamentNotFoundException(id));
+
+        tournamentRepository.deleteById(id);
+    }
 
     public UpdateTournamentRequestDTO updateTournament(Long id, UpdateTournamentRequestDTO dto) {
         validateTournamentDates(
                 dto.registrationDeadline(),
                 dto.startDate());
 
-        TournamentDomain tournament = tournamentRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Tournament not found"
-                        )
-                );
+        TournamentDomain tournament = getTournamentById(id);
+
         tournamentDtoMapper.updateDomainFromDto(tournament, dto);
 
         TournamentDomain updatedTournament =
