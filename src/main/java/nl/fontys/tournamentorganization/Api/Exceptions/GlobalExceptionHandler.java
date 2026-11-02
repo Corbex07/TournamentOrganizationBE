@@ -17,7 +17,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final Logger log =
+    private static final Logger LOGGER =
             LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -40,6 +40,7 @@ public class GlobalExceptionHandler {
                         errors
                 ));
     }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccessDenied(
             AccessDeniedException ex) {
@@ -55,7 +56,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleGeneral(
             Exception ex) {
 
-        log.error("Unexpected exception occurred", ex);
+        LOGGER.error("Unexpected exception occurred", ex);
 
         return ResponseEntity.status(
                 HttpStatus.INTERNAL_SERVER_ERROR
