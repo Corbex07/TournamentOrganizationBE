@@ -20,7 +20,7 @@ services:
         condition: any
 
   backend:
-    image: ghcr.io/corbex07/tournamentorganizationbe:cd-testing
+    image: ghcr.io/corbex07/tournamentorganizationbe:main
     ports:
       - "8080:8080"
     environment:
