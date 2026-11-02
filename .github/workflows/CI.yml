@@ -9,9 +9,9 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ "main","development", "CD-testing"]
+    branches: [ "main","development" ]
   pull_request:
-    branches: [ "main","development", "CD-testing"]
+    branches: [ "main","development" ]
 
 jobs:
   build:
@@ -38,7 +38,6 @@ jobs:
           --health-retries 5
 
     steps:
-      
       - uses: actions/checkout@v4
 
       - name: Set up JDK
