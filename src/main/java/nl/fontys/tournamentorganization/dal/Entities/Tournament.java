@@ -30,6 +30,8 @@ public class Tournament {
     @Column(name = "round_duration_hours")
     private Integer roundDurationHours;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
 
     public Tournament() {
@@ -75,29 +77,8 @@ public class Tournament {
 
     public void setId(long id) { this.id = id; }
 
-    public void setOrganiser(Users organiser) {
-        this.organiser = organiser;
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setMaxCapacity(Integer maxCapacity) {
-        this.maxCapacity = maxCapacity;
-    }
-
-    public void setRegistrationDeadline(LocalDateTime registrationDeadline) {
-        this.registrationDeadline = registrationDeadline;
-    }
-
-    public void setStartDate(LocalDateTime startDate) {
-        this.startDate = startDate;
-    }
-
-    public void setRoundDurationHours(Integer roundDurationHours) {
-        this.roundDurationHours = roundDurationHours;
-    }
-
 }
 

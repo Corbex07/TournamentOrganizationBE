@@ -74,10 +74,7 @@ public class TournamentService {
     }
 
     public void deleteTournament(Long id) {
-
-                tournamentRepository.findById(id)
-                .orElseThrow(() -> new TournamentNotFoundException(id));
-
+        
         tournamentRepository.deleteById(id);
     }
 
