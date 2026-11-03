@@ -9,5 +9,6 @@ public record TournamentResponseDTO(
         LocalDateTime registrationDeadline,
         LocalDateTime startDate,
         Integer roundDurationHours,
-        String organiserName
+        String organiserName,
+        Long organiserId
 ) { }
