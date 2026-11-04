@@ -1,5 +1,6 @@
 package nl.fontys.tournamentorganization.dal.Repositories.Implementations;
 
+import nl.fontys.tournamentorganization.Api.Exceptions.TournamentNotFoundException;
 import nl.fontys.tournamentorganization.bll.Domains.TournamentDomain;
 import nl.fontys.tournamentorganization.dal.Mappers.TournamentMapper;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.TournamentRepository;
@@ -60,6 +61,14 @@ public class TournamentRepositoryImpl implements TournamentRepository {
 
     @Override
     public void deleteById(Long id) {
-        jpaRepository.deleteById(id);
+
+        Tournament entity = jpaRepository.findById(id)
+                .orElseThrow(() -> new TournamentNotFoundException(id));
+
+
+        entity.setDeletedAt(LocalDateTime.now());
+
+        jpaRepository.save(entity);
+;
     }
 }

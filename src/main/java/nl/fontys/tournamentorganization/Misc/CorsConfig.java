@@ -17,7 +17,8 @@ public class CorsConfig {
 
         // Frontends allowed to access the backend
         config.setAllowedOrigins(List.of(
-                "http://192.168.193.96:5173"
+                "http://192.168.193.96:5173",
+                "http://localhost:5173"
         ));
 
         // Allowed HTTP methods

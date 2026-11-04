@@ -18,7 +18,8 @@ public class TournamentDtoMapper {
                 tournament.getRegistrationDeadline(),
                 tournament.getStartDate(),
                 tournament.getRoundDurationHours(),
-                tournament.getOrganiser().getUsername()
+                tournament.getOrganiser().getUsername(),
+                tournament.getOrganiser().getId()
         );
     }
 
