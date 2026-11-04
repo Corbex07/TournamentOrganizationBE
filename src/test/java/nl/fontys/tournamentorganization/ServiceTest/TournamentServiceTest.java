@@ -3,9 +3,11 @@ package nl.fontys.tournamentorganization.ServiceTest;
 import nl.fontys.tournamentorganization.Api.DTOs.Tournament.CreateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.Api.DTOs.Tournament.TournamentResponseDTO;
 import nl.fontys.tournamentorganization.Api.DTOs.Tournament.UpdateTournamentRequestDTO;
+import nl.fontys.tournamentorganization.Api.Exceptions.TournamentNotFoundException;
 import nl.fontys.tournamentorganization.bll.Domains.TournamentDomain;
 import nl.fontys.tournamentorganization.bll.Domains.UserDomain;
 import nl.fontys.tournamentorganization.Api.Mappers.TournamentDtoMapper;
+import nl.fontys.tournamentorganization.dal.Entities.Tournament;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.TournamentRepository;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.UserRepository;
 import nl.fontys.tournamentorganization.dal.Repositories.Jpa.JpaTournamentRepository;
@@ -25,8 +27,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -209,6 +210,7 @@ class TournamentServiceTest {
         // arrange
         UserDomain organiser = new UserDomain();
         organiser.setUsername("organiserUno");
+        organiser.setId(1L);
 
         TournamentDomain tournament1 = new TournamentDomain();
         tournament1.setId(1L);
@@ -291,57 +293,50 @@ class TournamentServiceTest {
     }
 
     @Test
-    void getTournamentById_shouldThrowNotFound_whenTournamentDoesNotExist() {
+    void getTournamentById_shouldThrowTournamentNotFound_whenTournamentDoesNotExist() {
         // arrange
         when(tournamentRepository.findById(99L))
                 .thenReturn(Optional.empty());
         // acts + asserts
-        ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
+        TournamentNotFoundException exception = assertThrows(
+                TournamentNotFoundException.class,
                 () -> tournamentService.getTournamentById(99L)
         );
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertEquals("Tournament with ID 99 not found", exception.getMessage());
     }
 
     // deleteTournament ----------------------------------------------------------------------------------------------------
 
     @Test
-    void deleteTournament_shouldDeleteCorrespondingTournament() {
+    void deleteTournament_shouldSoftDeleteCorrespondingTournament() {
         // arrange
         Long tournamentId = 1L;
-
-        TournamentDomain tournament = new TournamentDomain(
-                "Tournament 1",
-                null,
-                8,
-                LocalDateTime.of(2027, 9, 19, 18, 0),
-                LocalDateTime.of(2027, 9, 20, 18, 0),
-                48
-        );
-
-        when(tournamentRepository.findById(tournamentId))
-                .thenReturn(Optional.of(tournament));
 
         // act
         tournamentService.deleteTournament(tournamentId);
 
         // assert
-        verify(tournamentRepository).deleteById(tournamentId);
+        verify(tournamentRepository, times(1))
+                .deleteById(tournamentId);
     }
 
     @Test
-    void deleteTournament_shouldThrowNotFound_whenTournamentDoesNotExist() {
+    void deleteTournament_shouldThrowTournamentNotFound_whenTournamentDoesNotExist() {
         // arrange
-        when(tournamentRepository.findById(1L))
-                .thenReturn(Optional.empty());
-        // act + asserts
+        Long tournamentId = 99L;
+
+        doThrow(new TournamentNotFoundException(tournamentId))
+                .when(tournamentRepository)
+                .deleteById(tournamentId);
+
+        // act + assert
         assertThrows(
-                IllegalArgumentException.class,
-                () -> tournamentService.deleteTournament(1L)
+                TournamentNotFoundException.class,
+                () -> tournamentService.deleteTournament(tournamentId)
         );
 
-        verify(tournamentRepository, never()).deleteById(anyLong());
+        verify(tournamentRepository).deleteById(tournamentId);
     }
 
     // updateTournament ----------------------------------------------------------------------------------------------------
@@ -394,6 +389,7 @@ class TournamentServiceTest {
         // Arrange
         UserDomain organiser = new UserDomain();
         organiser.setUsername("organiserUno");
+        organiser.setId(1L);
 
         TournamentDomain tournament1 = new TournamentDomain();
         tournament1.setId(1L);
