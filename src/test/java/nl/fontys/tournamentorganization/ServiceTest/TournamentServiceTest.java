@@ -247,7 +247,8 @@ class TournamentServiceTest {
                         LocalDateTime.of(2027, 9, 19, 18, 0),
                         LocalDateTime.of(2027, 9, 20, 18, 0),
                         48,
-                        "organiserUno"
+                        "organiserUno",
+                        1L
                 ),
                 new TournamentResponseDTO(
                         2L,
@@ -256,7 +257,8 @@ class TournamentServiceTest {
                         LocalDateTime.of(2027, 9, 19, 18, 0),
                         LocalDateTime.of(2027, 9, 20, 18, 0),
                         48,
-                        "organiserUno"
+                        "organiserUno",
+                        1L
                 )
         );
 
@@ -431,7 +433,8 @@ class TournamentServiceTest {
                         LocalDateTime.of(2027, 9, 19, 18, 0),
                         LocalDateTime.of(2027, 9, 20, 18, 0),
                         48,
-                        "organiserUno"
+                        "organiserUno",
+                        1L
                 ),
                 new TournamentResponseDTO(
                         2L,
@@ -440,7 +443,8 @@ class TournamentServiceTest {
                         LocalDateTime.of(2027, 10, 19, 18, 0),
                         LocalDateTime.of(2027, 10, 20, 18, 0),
                         24,
-                        "organiserUno"
+                        "organiserUno",
+                        1L
                 )
         );
 
