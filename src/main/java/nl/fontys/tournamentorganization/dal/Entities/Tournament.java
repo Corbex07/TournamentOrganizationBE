@@ -75,6 +75,8 @@ public class Tournament {
 
     public Integer getRoundDurationHours() { return roundDurationHours; }
 
+    public LocalDateTime getDeletedAt() { return  deletedAt; }
+
     public void setId(long id) { this.id = id; }
 
     public void setDeletedAt(LocalDateTime deletedAt) {

@@ -45,7 +45,7 @@ public class TournamentRepositoryImpl implements TournamentRepository {
     @Override
     public List<TournamentDomain> findByRegistrationDeadlineAfter(LocalDateTime dateTime) {
         return jpaRepository.findByRegistrationDeadlineAfter(dateTime)
-                .stream()
+                .stream().filter(entity -> entity.getDeletedAt() == null)
                 .map(tournamentMapper::toDomain)
                 .toList();
     }
