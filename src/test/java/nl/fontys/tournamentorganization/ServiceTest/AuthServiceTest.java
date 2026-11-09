@@ -1,11 +1,14 @@
 package nl.fontys.tournamentorganization.ServiceTest;
 
 import nl.fontys.tournamentorganization.Api.DTOs.User.UserLoginRequestDTO;
+import nl.fontys.tournamentorganization.Api.DTOs.User.UserRegistrationRequestDTO;
+import nl.fontys.tournamentorganization.bll.Domains.TournamentDomain;
 import nl.fontys.tournamentorganization.bll.Domains.UserDomain;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.UserRepository;
 import nl.fontys.tournamentorganization.bll.services.AuthService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,8 +19,9 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
@@ -112,4 +116,94 @@ public class AuthServiceTest {
 
         verifyNoInteractions(passwordEncoder);
     }
+
+    @Test
+    void register_shouldSaveUser_whenCredentialsAreCorrect() {
+
+        // Arrange
+        UserRegistrationRequestDTO requestDTO = new UserRegistrationRequestDTO("user", "email", "password");
+
+        when(userRepository.existsByEmail("email"))
+                .thenReturn(Boolean.FALSE);
+
+        when(userRepository.existsByUsername("user"))
+                .thenReturn(Boolean.FALSE);
+
+        when(passwordEncoder.encode("password"))
+                .thenReturn("encodedPassword");
+        // Act
+
+        authService.register(requestDTO);
+
+        // Assert
+        ArgumentCaptor<UserDomain> userCaptor =
+                ArgumentCaptor.forClass(UserDomain.class);
+
+        verify(userRepository).save(userCaptor.capture());
+
+        UserDomain savedUser = userCaptor.getValue();
+
+        assertEquals("user", savedUser.getUsername());
+        assertEquals("email", savedUser.getEmail());
+        assertEquals("encodedPassword", savedUser.getPasswordHash());
+        verify(passwordEncoder).encode("password");
+    }
+
+    @Test
+    void register_shouldThrowConflict_whenNameIsUsed() {
+
+        // Arrange
+        UserRegistrationRequestDTO requestDTO = new UserRegistrationRequestDTO("existingName", "email", "password");
+
+        when(userRepository.existsByUsername("existingName"))
+                .thenReturn(Boolean.TRUE);
+
+        // Act
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> authService.register(requestDTO)
+        );
+
+        assertEquals(
+                HttpStatus.CONFLICT,
+                exception.getStatusCode()
+        );
+
+        // Assert
+
+        verify(userRepository, never())
+                .save(any(UserDomain.class));
+    }
+
+    @Test
+    void register_shouldThrowConflict_whenEmailIsUsed() {
+
+        // Arrange
+        UserRegistrationRequestDTO requestDTO = new UserRegistrationRequestDTO("user", "existingEmail", "password");
+
+        when(userRepository.existsByEmail("existingEmail"))
+                .thenReturn(Boolean.TRUE);
+
+        // Act
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> authService.register(requestDTO)
+        );
+
+        assertEquals(
+                HttpStatus.CONFLICT,
+                exception.getStatusCode()
+        );
+
+        // Assert
+
+        verify(userRepository, never())
+                .save(any(UserDomain.class));
+    }
+
+
+
+
 }
