@@ -35,9 +35,6 @@ import static org.mockito.Mockito.*;
 class TournamentServiceTest {
 
     @Mock
-    private JpaTournamentRepository jpaTournamentRepository;
-
-    @Mock
     private TournamentRepository tournamentRepository;
 
     @Mock
@@ -148,6 +145,27 @@ class TournamentServiceTest {
                 null,
                 validDTO.maxCapacity(),
                 validDTO.registrationDeadline(),
+                validDTO.startDate(),
+                validDTO.roundDurationHours()
+        );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> tournamentService.createTournament(createTournamentRequestDTO)
+        );
+
+        verify(tournamentRepository, never())
+                .save(any(TournamentDomain.class));
+    }
+
+    @Test
+    void saveTournament_shouldThrowException_whenRegistrationDeadlineIsNull() {
+        CreateTournamentRequestDTO validDTO = createValidCreateTournamentRequestDTO();
+
+        CreateTournamentRequestDTO createTournamentRequestDTO = new CreateTournamentRequestDTO(
+                validDTO.name(),
+                validDTO.maxCapacity(),
+                null,
                 validDTO.startDate(),
                 validDTO.roundDurationHours()
         );
@@ -382,6 +400,36 @@ class TournamentServiceTest {
         verify(tournamentRepository).save(existingTournament);
     }
 
+    @Test
+    void updateTournament_shouldThrowTournamentNotFound_whenNoTournament() {
+        // Arrange
+        UpdateTournamentRequestDTO validDTO = createValidUpdateTournamentRequestDTO();
+
+        UpdateTournamentRequestDTO UpdateTournamentRequestDTO = new UpdateTournamentRequestDTO(
+
+                "Updated Tournament",
+                16,
+                validDTO.registrationDeadline(),
+                validDTO.startDate(),
+                validDTO.roundDurationHours()
+        );
+        Long tournamentId = 1L;
+
+        when(tournamentRepository.findById(tournamentId))
+                .thenReturn(Optional.empty());
+
+        // Acts
+
+        TournamentNotFoundException exception = assertThrows(
+                TournamentNotFoundException.class,
+                () -> tournamentService.updateTournament( tournamentId, UpdateTournamentRequestDTO ));
+
+        // Asserts
+
+        assertEquals("Tournament with ID 1 not found", exception.getMessage());
+
+
+    }
     // getAllOpenRegistrationTournaments -------------------------------------------------------------------------------
     
     @Test
