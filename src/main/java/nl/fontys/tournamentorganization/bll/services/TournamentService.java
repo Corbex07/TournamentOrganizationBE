@@ -98,7 +98,7 @@ public class TournamentService {
 
         validateTournamentDates(registrationDeadline, startDate);
 
-        tournamentCreateDtoMapper.updateDomainFromDto(tournament, dto);
+        tournamentPatchMapper.updateTournament(dto, tournament);
 
         TournamentDomain updatedTournament =
                 tournamentRepository.save(tournament);
