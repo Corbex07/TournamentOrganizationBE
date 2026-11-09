@@ -56,7 +56,7 @@ public class TournamentController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<?> updateTournament(
             @PathVariable Long id,
             @Valid @RequestBody UpdateTournamentRequestDTO updateTournamentRequestDTO) {

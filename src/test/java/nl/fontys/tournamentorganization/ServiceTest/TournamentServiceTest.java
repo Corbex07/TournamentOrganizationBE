@@ -3,9 +3,10 @@ package nl.fontys.tournamentorganization.ServiceTest;
 import nl.fontys.tournamentorganization.Api.DTOs.Tournament.CreateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.Api.DTOs.Tournament.TournamentResponseDTO;
 import nl.fontys.tournamentorganization.Api.DTOs.Tournament.UpdateTournamentRequestDTO;
+import nl.fontys.tournamentorganization.Api.Mappers.TournamentPatchMapper;
 import nl.fontys.tournamentorganization.bll.Domains.TournamentDomain;
 import nl.fontys.tournamentorganization.bll.Domains.UserDomain;
-import nl.fontys.tournamentorganization.Api.Mappers.TournamentDtoMapper;
+import nl.fontys.tournamentorganization.Api.Mappers.TournamentCreateDtoMapper;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.TournamentRepository;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.UserRepository;
 import nl.fontys.tournamentorganization.dal.Repositories.Jpa.JpaTournamentRepository;
@@ -34,7 +35,7 @@ import static org.mockito.Mockito.*;
 class TournamentServiceTest {
 
     @Mock
-    private JpaTournamentRepository jpaTournamentRepository;
+    private TournamentPatchMapper tournamentPatchMapper;
 
     @Mock
     private TournamentRepository tournamentRepository;
@@ -50,13 +51,14 @@ class TournamentServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        TournamentDtoMapper tournamentDtoMapper =
-                new TournamentDtoMapper();
+        TournamentCreateDtoMapper tournamentCreateDtoMapper =
+                new TournamentCreateDtoMapper();
 
         tournamentService = new TournamentService(
+                tournamentPatchMapper,
                 userRepository,
                 tournamentRepository,
-                tournamentDtoMapper
+                tournamentCreateDtoMapper
         );
     }
 
