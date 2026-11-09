@@ -28,10 +28,10 @@ public class TournamentService {
     private final TournamentCreateDtoMapper tournamentCreateDtoMapper;
 
 
-    public TournamentService(TournamentPatchMapper tournamentPatchMapper,
-                             UserRepository userRepository,
+    public TournamentService(UserRepository userRepository,
                              TournamentRepository tournamentRepository,
-                             TournamentCreateDtoMapper dtoMapper) {
+                             TournamentCreateDtoMapper dtoMapper,
+                             TournamentPatchMapper tournamentPatchMapper) {
         this.tournamentPatchMapper = tournamentPatchMapper;
         this.userRepository = userRepository;
         this.tournamentRepository = tournamentRepository;

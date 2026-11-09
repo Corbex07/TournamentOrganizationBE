@@ -1,5 +1,6 @@
 package nl.fontys.tournamentorganization.Misc;
 
+import nl.fontys.tournamentorganization.bll.enums.TournamentStatus;
 import nl.fontys.tournamentorganization.dal.Repositories.Jpa.JpaTournamentRepository;
 import nl.fontys.tournamentorganization.dal.Repositories.Jpa.JpaUserRepository;
 import nl.fontys.tournamentorganization.dal.Entities.Tournament;
@@ -57,73 +58,90 @@ public class DatabaseSeeder implements CommandLineRunner {
         Tournament tournament1 = new Tournament(
                 "Fontys Valorant Cup",
                 organiser1,
+                null,
                 8,
                 LocalDateTime.of(2027, 9, 19, 18, 0),
                 LocalDateTime.of(2027, 9, 20, 18, 0),
-                24
+                24,
+                TournamentStatus.Open
         );
 
         Tournament tournament2 = new Tournament(
                 "Weekend Warriors Cup",
                 organiser2,
+                "this is a wonderful test",
                 16,
                 LocalDateTime.of(2027, 9, 25, 18, 0),
                 LocalDateTime.of(2027, 9, 26, 18, 0),
-                48
+                48,
+                TournamentStatus.Open
         );
 
         Tournament tournament3 = new Tournament(
                 "Benelux Amateur Open",
                 organiser1,
+                null,
                 8,
                 LocalDateTime.of(2027, 10, 2, 20, 0),
                 LocalDateTime.of(2027, 10, 3, 14, 0),
-                24
+                24,
+                TournamentStatus.Open
+
         );
 
         Tournament tournament4 = new Tournament(
                 "Friday Night Valorant",
                 organiser2,
+                null,
                 8,
                 LocalDateTime.of(2027, 10, 8, 18, 0),
                 LocalDateTime.of(2027, 10, 8, 20, 0),
-                24
+                24,
+                TournamentStatus.Open
         );
 
         Tournament tournament5 = new Tournament(
                 "Autumn Clash",
                 organiser1,
+                null,
                 16,
                 LocalDateTime.of(2027, 10, 15, 23, 59),
                 LocalDateTime.of(2027, 10, 17, 13, 0),
-                48
+                48,
+                TournamentStatus.Open
         );
 
         Tournament tournament6 = new Tournament(
                 "Fontys Esports Championship",
                 organiser2,
+                null,
                 16,
                 LocalDateTime.of(2027, 10, 22, 18, 0),
                 LocalDateTime.of(2027, 10, 23, 12, 0),
-                48
+                48,
+                TournamentStatus.Open
         );
 
         Tournament tournament7 = new Tournament(
                 "Halloween Showdown",
                 organiser1,
+                null,
                 8,
                 LocalDateTime.of(2027, 10, 29, 20, 0),
                 LocalDateTime.of(2027, 10, 31, 18, 0),
-                24
+                24,
+                TournamentStatus.Open
         );
 
         Tournament tournament8 = new Tournament(
                 "Winter Qualifier",
                 organiser2,
+                null,
                 16,
                 LocalDateTime.of(2027, 11, 12, 23, 59),
                 LocalDateTime.of(2027, 11, 14, 14, 0),
-                48
+                48,
+                TournamentStatus.Open
         );
 
         tournamentRepository.saveAll(List.of(

@@ -8,12 +8,14 @@ import nl.fontys.tournamentorganization.bll.Domains.TournamentDomain;
 import nl.fontys.tournamentorganization.bll.Domains.UserDomain;
 import nl.fontys.tournamentorganization.Api.Mappers.TournamentCreateDtoMapper;
 import nl.fontys.tournamentorganization.Api.Exceptions.TournamentNotFoundException;
+import nl.fontys.tournamentorganization.bll.enums.TournamentStatus;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.TournamentRepository;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.UserRepository;
 import nl.fontys.tournamentorganization.bll.services.TournamentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -31,7 +33,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class TournamentServiceTest {
 
-    @Mock
     private TournamentPatchMapper tournamentPatchMapper;
 
     @Mock
@@ -48,14 +49,18 @@ class TournamentServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
+        tournamentPatchMapper =
+                Mappers.getMapper(TournamentPatchMapper.class);
+
+
         TournamentCreateDtoMapper tournamentCreateDtoMapper =
                 new TournamentCreateDtoMapper();
 
         tournamentService = new TournamentService(
-                tournamentPatchMapper,
                 userRepository,
                 tournamentRepository,
-                tournamentCreateDtoMapper
+                tournamentCreateDtoMapper,
+                tournamentPatchMapper
         );
     }
 
@@ -72,6 +77,7 @@ class TournamentServiceTest {
         return new UpdateTournamentRequestDTO(
                 "Fontys Valorant Cup",
                 8,
+                null,
                 LocalDateTime.of(2027, 9, 20, 18, 0),
                 LocalDateTime.of(2027, 9, 21, 18, 0),
                 48
@@ -222,6 +228,7 @@ class TournamentServiceTest {
         );
         tournament1.setRoundDurationHours(48);
         tournament1.setOrganiser(organiser);
+        tournament1.setTournamentStatus(TournamentStatus.Open);
 
         TournamentDomain tournament2 = new TournamentDomain();
         tournament2.setId(2L);
@@ -235,6 +242,7 @@ class TournamentServiceTest {
         );
         tournament2.setRoundDurationHours(48);
         tournament2.setOrganiser(organiser);
+        tournament2.setTournamentStatus(TournamentStatus.Open);
 
         when(tournamentRepository.findAll())
                 .thenReturn(List.of(tournament1, tournament2));
@@ -243,22 +251,26 @@ class TournamentServiceTest {
                 new TournamentResponseDTO(
                         1L,
                         "Tournament1",
+                        null,
                         8,
                         LocalDateTime.of(2027, 9, 19, 18, 0),
                         LocalDateTime.of(2027, 9, 20, 18, 0),
                         48,
                         "organiserUno",
-                        1L
+                        1L,
+                        TournamentStatus.Open
                 ),
                 new TournamentResponseDTO(
                         2L,
                         "Tournament2",
+                        null,
                         8,
                         LocalDateTime.of(2027, 9, 19, 18, 0),
                         LocalDateTime.of(2027, 9, 20, 18, 0),
                         48,
                         "organiserUno",
-                        1L
+                        1L,
+                        TournamentStatus.Open
                 )
         );
 
@@ -357,6 +369,7 @@ class TournamentServiceTest {
         UpdateTournamentRequestDTO UpdateTournamentRequestDTO = new UpdateTournamentRequestDTO(
                 "Updated Tournament",
                 16,
+                null,
                 validDTO.registrationDeadline(),
                 validDTO.startDate(),
                 validDTO.roundDurationHours()
@@ -401,6 +414,7 @@ class TournamentServiceTest {
         );
         tournament1.setRoundDurationHours(48);
         tournament1.setOrganiser(organiser);
+        tournament1.setTournamentStatus(TournamentStatus.Open);
 
         TournamentDomain tournament2 = new TournamentDomain();
         tournament2.setId(2L);
@@ -414,6 +428,7 @@ class TournamentServiceTest {
         );
         tournament2.setRoundDurationHours(24);
         tournament2.setOrganiser(organiser);
+        tournament2.setTournamentStatus(TournamentStatus.Open);
 
         when(tournamentRepository
                 .findByRegistrationDeadlineAfter(any(LocalDateTime.class)))
@@ -423,22 +438,28 @@ class TournamentServiceTest {
                 new TournamentResponseDTO(
                         1L,
                         "Tournament1",
+                        null,
                         8,
                         LocalDateTime.of(2027, 9, 19, 18, 0),
                         LocalDateTime.of(2027, 9, 20, 18, 0),
                         48,
                         "organiserUno",
-                        1L
+                        1L,
+                        TournamentStatus.Open
+
+
                 ),
                 new TournamentResponseDTO(
                         2L,
                         "Tournament2",
+                        null,
                         16,
                         LocalDateTime.of(2027, 10, 19, 18, 0),
                         LocalDateTime.of(2027, 10, 20, 18, 0),
                         24,
                         "organiserUno",
-                        1L
+                        1L,
+                        TournamentStatus.Open
                 )
         );
 

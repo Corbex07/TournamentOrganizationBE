@@ -29,10 +29,12 @@ public class TournamentMapper {
         Tournament entity = new Tournament(
                 domain.getName(),
                 userMapper.toEntity(domain.getOrganiser()),
+                domain.getDescription(),
                 domain.getMaxCapacity(),
                 domain.getRegistrationDeadline(),
                 domain.getStartDate(),
-                domain.getRoundDurationHours()
+                domain.getRoundDurationHours(),
+                domain.getTournamentStatus()
         );
 
         if (domain.getId() != null) {
