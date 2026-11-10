@@ -133,6 +133,8 @@ public class TournamentDomain {
         this.organiser = organiser;
     }
 
+    public void setDescription(String description) { this.description = description; }
+
     public void setMaxCapacity(Integer maxCapacity) {
         this.maxCapacity = maxCapacity;
     }
