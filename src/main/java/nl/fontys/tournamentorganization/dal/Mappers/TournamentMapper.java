@@ -18,10 +18,12 @@ public class TournamentMapper {
                 entity.getId(),
                 entity.getName(),
                 userMapper.toDomain(entity.getOrganiser()),
+                entity.getDescription(),
                 entity.getMaxCapacity(),
                 entity.getRegistrationDeadline(),
                 entity.getStartDate(),
-                entity.getRoundDurationHours()
+                entity.getRoundDurationHours(),
+                entity.getTournamentStatus()
         );
     }
 

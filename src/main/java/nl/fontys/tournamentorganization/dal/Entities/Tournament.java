@@ -88,6 +88,10 @@ public class Tournament {
 
     public LocalDateTime getDeletedAt() { return deletedAt; }
 
+    public String getDescription() { return description; }
+
+    public TournamentStatus getTournamentStatus() { return tournamentStatus; }
+
     public void setId(long id) { this.id = id; }
 
     public void setDeletedAt(LocalDateTime deletedAt) {
