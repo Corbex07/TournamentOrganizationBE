@@ -423,6 +423,7 @@ class TournamentServiceTest {
 
                 "Updated Tournament",
                 16,
+                null,
                 validDTO.registrationDeadline(),
                 validDTO.startDate(),
                 validDTO.roundDurationHours()
