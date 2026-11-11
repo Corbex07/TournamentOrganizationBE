@@ -100,32 +100,13 @@ jobs:
 
         run: |
           set -euo pipefail
-
-          # Verify required secrets exist
-          test -n "$DB_PASSWORD"
-          test -n "$GHCR_TOKEN"
-
-          # Keep registry login credentials temporary
-          export DOCKER_CONFIG
-          DOCKER_CONFIG="$(mktemp -d)"
+      
+          export DOCKER_CONFIG="$(mktemp -d)"
           trap 'rm -rf "$DOCKER_CONFIG"' EXIT
-
-          # Authenticate to GHCR
-          printf '%s' "$GHCR_TOKEN" |
-            docker login ghcr.io \
-              --username "$GHCR_USER" \
-              --password-stdin
-
-          # Start/update the application
-          docker compose \
-            -p tournament \
-            -f docker-compose.yml \
-            up -d --pull always --no-build
-
-          # Show running containers
-          docker compose \
-            -p tournament \
-            -f docker-compose.yml \
-            ps
-
+      
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io \
+          -u "$GHCR_USER" --password-stdin
+      
+          docker compose -p tournament \
+          up -d --pull always --no-build
   

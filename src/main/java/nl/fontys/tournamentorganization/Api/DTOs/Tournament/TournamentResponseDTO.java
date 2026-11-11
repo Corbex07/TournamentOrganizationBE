@@ -1,6 +1,5 @@
 package nl.fontys.tournamentorganization.Api.DTOs.Tournament;
 
-import jakarta.annotation.Nullable;
 import nl.fontys.tournamentorganization.bll.enums.TournamentStatus;
 
 import java.time.LocalDateTime;

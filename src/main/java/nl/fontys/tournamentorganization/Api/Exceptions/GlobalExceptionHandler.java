@@ -40,6 +40,7 @@ public class GlobalExceptionHandler {
                         errors
                 ));
     }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccessDenied(
             AccessDeniedException ex) {
