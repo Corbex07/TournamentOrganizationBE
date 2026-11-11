@@ -8,6 +8,7 @@ import nl.fontys.tournamentorganization.Api.Mappers.TournamentPatchMapper;
 import nl.fontys.tournamentorganization.bll.Domains.TournamentDomain;
 import nl.fontys.tournamentorganization.bll.Domains.UserDomain;
 import nl.fontys.tournamentorganization.Api.Mappers.TournamentCreateDtoMapper;
+import nl.fontys.tournamentorganization.bll.enums.TournamentStatus;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.TournamentRepository;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.UserRepository;
 import org.springframework.stereotype.Service;
@@ -28,10 +29,10 @@ public class TournamentService {
     private final TournamentCreateDtoMapper tournamentCreateDtoMapper;
 
 
-    public TournamentService(TournamentPatchMapper tournamentPatchMapper,
-                             UserRepository userRepository,
+    public TournamentService(UserRepository userRepository,
                              TournamentRepository tournamentRepository,
-                             TournamentCreateDtoMapper dtoMapper) {
+                             TournamentCreateDtoMapper dtoMapper,
+                             TournamentPatchMapper tournamentPatchMapper) {
         this.tournamentPatchMapper = tournamentPatchMapper;
         this.userRepository = userRepository;
         this.tournamentRepository = tournamentRepository;
@@ -74,6 +75,8 @@ public class TournamentService {
         TournamentDomain tournament =
                 tournamentCreateDtoMapper.fromCreateDto(dto, organiser);
 
+        tournament.setTournamentStatus(TournamentStatus.Open);
+
         tournamentRepository.save(tournament);
     }
 
@@ -98,7 +101,7 @@ public class TournamentService {
 
         validateTournamentDates(registrationDeadline, startDate);
 
-        tournamentCreateDtoMapper.updateDomainFromDto(tournament, dto);
+        tournamentPatchMapper.updateTournament(dto, tournament);
 
         TournamentDomain updatedTournament =
                 tournamentRepository.save(tournament);

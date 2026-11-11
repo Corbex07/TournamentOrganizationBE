@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 public record CreateTournamentRequestDTO(
         @NotBlank(message = "Tournament name is required")
-        @Size(max = 100, message = "Name cannot exceed 100 characters")
+        @Size(max = 50, message = "Name cannot exceed 100 characters")
         String name,
 
         @NotNull(message = "Maximum capacity is required")

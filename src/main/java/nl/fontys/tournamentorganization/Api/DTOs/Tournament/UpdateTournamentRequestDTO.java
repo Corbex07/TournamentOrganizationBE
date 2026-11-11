@@ -11,6 +11,8 @@ public record UpdateTournamentRequestDTO(
         @Min(value = 2, message = "Capacity must be at least 2")
         Integer maxCapacity,
 
+        String description,
+
         LocalDateTime registrationDeadline,
 
         LocalDateTime startDate,

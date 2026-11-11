@@ -14,12 +14,14 @@ public class TournamentCreateDtoMapper {
         return new TournamentResponseDTO(
                 tournament.getId(),
                 tournament.getName(),
+                tournament.getDescription(),
                 tournament.getMaxCapacity(),
                 tournament.getRegistrationDeadline(),
                 tournament.getStartDate(),
                 tournament.getRoundDurationHours(),
                 tournament.getOrganiser().getUsername(),
-                tournament.getOrganiser().getId()
+                tournament.getOrganiser().getId(),
+                tournament.getTournamentStatus()
         );
     }
 
@@ -37,16 +39,6 @@ public class TournamentCreateDtoMapper {
         );
     }
 
-    public void updateDomainFromDto(
-            TournamentDomain tournament,
-            UpdateTournamentRequestDTO dto
-    ) {
-        tournament.setName(dto.name());
-        tournament.setMaxCapacity(dto.maxCapacity());
-        tournament.setRegistrationDeadline(dto.registrationDeadline());
-        tournament.setStartDate(dto.startDate());
-        tournament.setRoundDurationHours(dto.roundDurationHours());
-    }
 
     public UpdateTournamentRequestDTO toUpdateDto(
             TournamentDomain tournament
@@ -54,6 +46,7 @@ public class TournamentCreateDtoMapper {
         return new UpdateTournamentRequestDTO(
                 tournament.getName(),
                 tournament.getMaxCapacity(),
+                tournament.getDescription(),
                 tournament.getRegistrationDeadline(),
                 tournament.getStartDate(),
                 tournament.getRoundDurationHours()
