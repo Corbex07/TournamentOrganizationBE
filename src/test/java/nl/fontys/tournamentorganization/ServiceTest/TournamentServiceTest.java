@@ -9,6 +9,7 @@ import nl.fontys.tournamentorganization.bll.Domains.UserDomain;
 import nl.fontys.tournamentorganization.Api.Mappers.TournamentCreateDtoMapper;
 import nl.fontys.tournamentorganization.Api.Exceptions.TournamentNotFoundException;
 import nl.fontys.tournamentorganization.bll.enums.TournamentStatus;
+import nl.fontys.tournamentorganization.dal.Entities.Tournament;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.TournamentRepository;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.UserRepository;
 import nl.fontys.tournamentorganization.bll.services.TournamentService;
@@ -34,6 +35,9 @@ import static org.mockito.Mockito.*;
 class TournamentServiceTest {
 
     private TournamentPatchMapper tournamentPatchMapper;
+
+    @Mock
+    private TournamentCreateDtoMapper tournamentCreateDtoMapper;
 
     @Mock
     private TournamentRepository tournamentRepository;
@@ -521,6 +525,35 @@ class TournamentServiceTest {
 
         // Assert
         assertEquals(expected, actual);
+    }
+
+    // getTournamentResponse ----------------------------------------------------------------------------------------\
+
+    @Test
+    void getTournamentResponseById_getsTournamentResponse() {
+        // Arrange
+        Long tournamentId = 1L;
+
+        UserDomain organiser = new UserDomain();
+        organiser.setUsername("testOrganiser");
+
+        TournamentDomain tournament = new TournamentDomain();
+        tournament.setId(tournamentId);
+        tournament.setOrganiser(organiser);
+
+        when(tournamentRepository.findById(tournamentId))
+                .thenReturn(Optional.of(tournament));
+
+        // Act
+        TournamentResponseDTO result =
+                tournamentService.getTournamentResponseById(tournamentId);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(tournamentId, result.id());
+        assertEquals("testOrganiser", result.organiserName());
+
+        verify(tournamentRepository).findById(tournamentId);
     }
 }
 
