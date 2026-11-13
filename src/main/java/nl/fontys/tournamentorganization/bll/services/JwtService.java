@@ -27,7 +27,7 @@ public class JwtService {
         JwtClaimsSet claimsSet = JwtClaimsSet.builder()
                 .subject(String.valueOf(userDomain.getId()))
                 .issuer("tournament-organization-api")
-                .audience(List.of(""))
+                .audience(List.of("tournament-api"))
                 .issuedAt(now)
                 .expiresAt(now.plus(10, ChronoUnit.MINUTES))
                 .build();

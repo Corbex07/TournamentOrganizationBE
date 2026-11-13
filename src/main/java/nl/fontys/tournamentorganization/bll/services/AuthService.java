@@ -55,7 +55,7 @@ public class AuthService {
     private UserDomain authenticate(UserLoginRequestDTO requestDTO) {
 
         UserDomain user = userRepository
-                .findByUsername(requestDTO.username())
+                .findByEmail(requestDTO.email())
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.UNAUTHORIZED,
                         "Invalid username or password"
