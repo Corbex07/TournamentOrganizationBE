@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Service
 public class JwtService {
@@ -24,7 +25,9 @@ public class JwtService {
         Instant now = Instant.now();
 
         JwtClaimsSet claimsSet = JwtClaimsSet.builder()
-                .subject(String.valueOf(userDomain.getId())) //THIS BAD? IDK!
+                .subject(String.valueOf(userDomain.getId()))
+                .issuer("tournament-organization-api")
+                .audience(List.of(""))
                 .issuedAt(now)
                 .expiresAt(now.plus(10, ChronoUnit.MINUTES))
                 .build();

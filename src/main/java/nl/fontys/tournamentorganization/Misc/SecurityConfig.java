@@ -2,6 +2,7 @@
 package nl.fontys.tournamentorganization.Misc;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,17 +12,19 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
 
 @Configuration
 public class SecurityConfig {
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
     @Bean
     public SecurityFilterChain securityFilterChain(
@@ -72,10 +75,17 @@ public class SecurityConfig {
     // Should decide on a SecretKey sometime later aka ask tom when he isn't playing fortnite DONT EVEN KNOW IF I NEED TO DO THIS
     @Bean
     public JwtDecoder jwtDecoder(SecretKey secretKey) {
-        return NimbusJwtDecoder
+
+        NimbusJwtDecoder decoder = NimbusJwtDecoder
                 .withSecretKey(secretKey)
                 .macAlgorithm(MacAlgorithm.HS256) // should be changed if using other algorithm
                 .build();
+
+        var issuerValidator = JwtValidators.createDefaultWithIssuer("tournament-organization-api");
+
+        var audienceValidator = new JwtAudienceValidator( "tournament-api");
+
+        return decoder;
     }
 
     // if ya gonna decode you should probably encode first - sun tzu; art of war line 599
@@ -84,6 +94,19 @@ public class SecurityConfig {
         return new NimbusJwtEncoder(
                 new ImmutableSecret<>(secretKey)
         );
+    }
+
+    @Bean
+    public SecretKey secretKey() {
+        byte[] keyBytes = Base64.getDecoder().decode(jwtSecret);
+
+        if (keyBytes.length != 32) {
+            throw new IllegalStateException(
+                    "HS256 JWT secret must contain exactly 32 bytes"
+            );
+        }
+
+        return new SecretKeySpec(keyBytes, "HmacSHA256");
     }
 }
 
