@@ -52,7 +52,7 @@ public class AuthService {
         userRepository.save(userDomain);
     }
 
-    private UserDomain authenticate(UserLoginRequestDTO requestDTO) {
+    public UserDomain authenticate(UserLoginRequestDTO requestDTO) {
 
         UserDomain user = userRepository
                 .findByEmail(requestDTO.email())

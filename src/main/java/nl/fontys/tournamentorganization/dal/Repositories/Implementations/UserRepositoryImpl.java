@@ -38,8 +38,8 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<UserDomain> findByEmail(String username) {
-        return jpaRepository.findByEmail(username)
+    public Optional<UserDomain> findByEmail(String email) {
+        return jpaRepository.findByEmail(email)
                 .map(userMapper::toDomain);
     }
 

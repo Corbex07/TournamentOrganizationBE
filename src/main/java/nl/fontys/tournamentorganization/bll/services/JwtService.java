@@ -29,7 +29,7 @@ public class JwtService {
                 .issuer("tournament-organization-api")
                 .audience(List.of("tournament-api"))
                 .issuedAt(now)
-                .expiresAt(now.plus(10, ChronoUnit.MINUTES))
+                .expiresAt(now.plus(2, ChronoUnit.MINUTES)) //should be lower after refresh tokens are a thing
                 .build();
 
         JwsHeader header = JwsHeader.with(
