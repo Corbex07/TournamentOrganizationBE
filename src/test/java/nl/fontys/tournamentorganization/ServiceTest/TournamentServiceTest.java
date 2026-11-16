@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.security.access.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -99,7 +100,7 @@ class TournamentServiceTest {
         when(userRepository.findById(1L))
                 .thenReturn(Optional.of(organiser));
 
-        tournamentService.createTournament(createTournamentRequestDTO);
+        tournamentService.createTournament(createTournamentRequestDTO, 1L);
 
         ArgumentCaptor<TournamentDomain> captor =
                 ArgumentCaptor.forClass(TournamentDomain.class);
@@ -127,6 +128,21 @@ class TournamentServiceTest {
                 savedTournament.getOrganiser()
         );
     }
+
+    @Test
+    void saveTournament_shouldThrowException_whenNoUserIsFound() {
+        CreateTournamentRequestDTO createTournamentRequestDTO = createValidCreateTournamentRequestDTO();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> tournamentService.createTournament(createTournamentRequestDTO, 1L)
+        );
+
+        verify(tournamentRepository, never())
+                .save(any(TournamentDomain.class));
+
+    }
+
     @Test
     void saveTournament_shouldThrowException_whenCapacityIsNegative() {
         CreateTournamentRequestDTO validDTO = createValidCreateTournamentRequestDTO();
@@ -139,10 +155,9 @@ class TournamentServiceTest {
                 validDTO.roundDurationHours()
         );
 
-
         assertThrows(
                 IllegalArgumentException.class,
-                () -> tournamentService.createTournament(createTournamentRequestDTO)
+                () -> tournamentService.createTournament(createTournamentRequestDTO, 1L)
         );
 
         verify(tournamentRepository, never())
@@ -162,7 +177,7 @@ class TournamentServiceTest {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> tournamentService.createTournament(createTournamentRequestDTO)
+                () -> tournamentService.createTournament(createTournamentRequestDTO, 1L)
         );
 
         verify(tournamentRepository, never())
@@ -183,7 +198,7 @@ class TournamentServiceTest {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> tournamentService.createTournament(createTournamentRequestDTO)
+                () -> tournamentService.createTournament(createTournamentRequestDTO, 1L)
         );
 
         verify(tournamentRepository, never())
@@ -204,7 +219,7 @@ class TournamentServiceTest {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> tournamentService.createTournament(createTournamentRequestDTO)
+                () -> tournamentService.createTournament(createTournamentRequestDTO, 1L)
         );
 
         verify(tournamentRepository, never())
@@ -225,7 +240,7 @@ class TournamentServiceTest {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> tournamentService.createTournament(createTournamentRequestDTO)
+                () -> tournamentService.createTournament(createTournamentRequestDTO, 1L)
         );
 
         verify(tournamentRepository, never())
@@ -347,9 +362,19 @@ class TournamentServiceTest {
     void deleteTournament_shouldSoftDeleteCorrespondingTournament() {
         // arrange
         Long tournamentId = 1L;
+        Long organiserId = 1L;
+
+        UserDomain organiser = mock(UserDomain.class);
+        when(organiser.getId()).thenReturn(organiserId);
+
+        TournamentDomain tournament = mock(TournamentDomain.class);
+        when(tournament.getOrganiser()).thenReturn(organiser);
+
+        when(tournamentRepository.findById(tournamentId))
+                .thenReturn(Optional.of(tournament));
 
         // act
-        tournamentService.deleteTournament(tournamentId);
+        tournamentService.deleteTournament(tournamentId, organiserId);
 
         // assert
         verify(tournamentRepository, times(1))
@@ -360,25 +385,66 @@ class TournamentServiceTest {
     void deleteTournament_shouldThrowTournamentNotFound_whenTournamentDoesNotExist() {
         // arrange
         Long tournamentId = 99L;
+        Long organiserId = 1L;
 
-        doThrow(new TournamentNotFoundException(tournamentId))
-                .when(tournamentRepository)
-                .deleteById(tournamentId);
+        when(tournamentRepository.findById(tournamentId))
+                .thenReturn(Optional.empty());
 
         // act + assert
         assertThrows(
                 TournamentNotFoundException.class,
-                () -> tournamentService.deleteTournament(tournamentId)
+                () -> tournamentService.deleteTournament(
+                        tournamentId,
+                        organiserId
+                )
         );
 
-        verify(tournamentRepository).deleteById(tournamentId);
+        verify(tournamentRepository, times(1))
+                .findById(tournamentId);
+
+        verify(tournamentRepository, never())
+                .deleteById(any());
+    }
+
+    @Test
+    void deleteTournament_shouldThrowAccessDenied_whenOrganiserIsWrong() {
+        // Arrange
+        Long tournamentId = 99L;
+        Long loggedInUserId = 1L;
+        Long actualOrganiserId = 2L;
+
+        UserDomain organiser = mock(UserDomain.class);
+        when(organiser.getId()).thenReturn(actualOrganiserId);
+
+        TournamentDomain tournament = mock(TournamentDomain.class);
+        when(tournament.getOrganiser()).thenReturn(organiser);
+
+        when(tournamentRepository.findById(tournamentId))
+                .thenReturn(Optional.of(tournament));
+
+        // Act + Assert
+        assertThrows(
+                AccessDeniedException.class,
+                () -> tournamentService.deleteTournament(
+                        tournamentId,
+                        loggedInUserId
+                )
+        );
+
+        verify(tournamentRepository, never())
+                .deleteById(any());
     }
 
     // updateTournament ----------------------------------------------------------------------------------------------------
 
     @Test
     void updateTournament_shouldUpdateAndReturnTournament() {
+        // Arrange
         Long tournamentId = 1L;
+        Long userId = 1L;
+
+        UserDomain organiser = mock(UserDomain.class);
+        when(organiser.getId()).thenReturn(userId);
 
         TournamentDomain existingTournament = new TournamentDomain(
                 "Tournament 1",
@@ -389,9 +455,12 @@ class TournamentServiceTest {
                 48
         );
 
-        UpdateTournamentRequestDTO validDTO = createValidUpdateTournamentRequestDTO();
+        existingTournament.setOrganiser(organiser);
 
-        UpdateTournamentRequestDTO UpdateTournamentRequestDTO = new UpdateTournamentRequestDTO(
+        UpdateTournamentRequestDTO validDTO =
+                createValidUpdateTournamentRequestDTO();
+
+        UpdateTournamentRequestDTO updateRequest = new UpdateTournamentRequestDTO(
                 "Updated Tournament",
                 16,
                 null,
@@ -406,13 +475,28 @@ class TournamentServiceTest {
         when(tournamentRepository.save(existingTournament))
                 .thenReturn(existingTournament);
 
+        // Act
         UpdateTournamentRequestDTO result =
-                tournamentService.updateTournament(tournamentId, UpdateTournamentRequestDTO);
+                tournamentService.updateTournament(
+                        tournamentId,
+                        updateRequest,
+                        userId
+                );
 
+        // Assert
         assertEquals("Updated Tournament", result.name());
         assertEquals(16, result.maxCapacity());
-        assertEquals(validDTO.registrationDeadline(), result.registrationDeadline());
-        assertEquals(validDTO.startDate(), result.startDate());
+
+        assertEquals(
+                validDTO.registrationDeadline(),
+                result.registrationDeadline()
+        );
+
+        assertEquals(
+                validDTO.startDate(),
+                result.startDate()
+        );
+
         assertEquals(48, result.roundDurationHours());
 
         verify(tournamentRepository).save(existingTournament);
@@ -421,10 +505,13 @@ class TournamentServiceTest {
     @Test
     void updateTournament_shouldThrowTournamentNotFound_whenNoTournament() {
         // Arrange
-        UpdateTournamentRequestDTO validDTO = createValidUpdateTournamentRequestDTO();
+        Long tournamentId = 1L;
+        Long userId = 1L;
 
-        UpdateTournamentRequestDTO UpdateTournamentRequestDTO = new UpdateTournamentRequestDTO(
+        UpdateTournamentRequestDTO validDTO =
+                createValidUpdateTournamentRequestDTO();
 
+        UpdateTournamentRequestDTO updateRequest = new UpdateTournamentRequestDTO(
                 "Updated Tournament",
                 16,
                 null,
@@ -432,22 +519,65 @@ class TournamentServiceTest {
                 validDTO.startDate(),
                 validDTO.roundDurationHours()
         );
-        Long tournamentId = 1L;
 
         when(tournamentRepository.findById(tournamentId))
                 .thenReturn(Optional.empty());
 
-        // Acts
-
+        // Act + Assert
         TournamentNotFoundException exception = assertThrows(
                 TournamentNotFoundException.class,
-                () -> tournamentService.updateTournament( tournamentId, UpdateTournamentRequestDTO ));
+                () -> tournamentService.updateTournament(
+                        tournamentId,
+                        updateRequest,
+                        userId
+                )
+        );
 
-        // Asserts
+        assertEquals(
+                "Tournament with ID 1 not found",
+                exception.getMessage()
+        );
 
-        assertEquals("Tournament with ID 1 not found", exception.getMessage());
+        verify(tournamentRepository, never())
+                .save(any(TournamentDomain.class));
+    }
 
+    @Test
+    void updateTournament_shouldThrowAccessDenied_whenOrganiserIsWrong() {
+        // Arrange
+        Long tournamentId = 1L;
+        Long loggedInUserId = 2L;
+        Long actualOrganiserId = 1L;
 
+        UserDomain organiser = mock(UserDomain.class);
+        when(organiser.getId()).thenReturn(actualOrganiserId);
+
+        TournamentDomain tournament = mock(TournamentDomain.class);
+        when(tournament.getOrganiser()).thenReturn(organiser);
+
+        when(tournamentRepository.findById(tournamentId))
+                .thenReturn(Optional.of(tournament));
+
+        UpdateTournamentRequestDTO request =
+                createValidUpdateTournamentRequestDTO();
+
+        // Act + Assert
+        AccessDeniedException exception = assertThrows(
+                AccessDeniedException.class,
+                () -> tournamentService.updateTournament(
+                        tournamentId,
+                        request,
+                        loggedInUserId
+                )
+        );
+
+        assertEquals(
+                "You are not allowed to update this tournament",
+                exception.getMessage()
+        );
+
+        verify(tournamentRepository, never())
+                .save(any(TournamentDomain.class));
     }
     // getAllOpenRegistrationTournaments -------------------------------------------------------------------------------
     

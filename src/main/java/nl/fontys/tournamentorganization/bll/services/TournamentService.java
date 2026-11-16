@@ -11,6 +11,7 @@ import nl.fontys.tournamentorganization.Api.Mappers.TournamentCreateDtoMapper;
 import nl.fontys.tournamentorganization.bll.enums.TournamentStatus;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.TournamentRepository;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.UserRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 
@@ -60,13 +61,12 @@ public class TournamentService {
         }
 
 
-    public void createTournament(CreateTournamentRequestDTO dto) {
+    public void createTournament(CreateTournamentRequestDTO dto, Long organiserId) {
         validateTournamentDates(
                 dto.registrationDeadline(),
                 dto.startDate());
 
-        // done manually due to not having implemented users yet.
-        UserDomain organiser = userRepository.findById(1L)
+        UserDomain organiser = userRepository.findById(organiserId)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Organiser not found")
                 );
@@ -80,34 +80,48 @@ public class TournamentService {
         tournamentRepository.save(tournament);
     }
 
-    public void deleteTournament(Long id) {
+    public void deleteTournament(Long id, Long userId) {
+        TournamentDomain tournament = getTournamentById(id);
+
+        if (!tournament.getOrganiser().getId().equals(userId)) {
+            throw new AccessDeniedException(
+                    "You are not allowed to delete this tournament"
+            );
+        }
 
         tournamentRepository.deleteById(id);
     }
 
-    public UpdateTournamentRequestDTO updateTournament(Long id, UpdateTournamentRequestDTO dto) {
+    public UpdateTournamentRequestDTO updateTournament(Long id, UpdateTournamentRequestDTO dto, Long userId) {
 
         TournamentDomain tournament = getTournamentById(id);
 
-        LocalDateTime registrationDeadline =
-                dto.registrationDeadline() != null
-                        ? dto.registrationDeadline()
-                        : tournament.getRegistrationDeadline();
+        if (!tournament.getOrganiser().getId().equals(userId)) {
+            throw new AccessDeniedException(
+                    "You are not allowed to update this tournament"
+            );
+        }
 
-        LocalDateTime startDate =
-                dto.startDate() != null
-                        ? dto.startDate()
-                        : tournament.getStartDate();
+            LocalDateTime registrationDeadline =
+                    dto.registrationDeadline() != null
+                            ? dto.registrationDeadline()
+                            : tournament.getRegistrationDeadline();
 
-        validateTournamentDates(registrationDeadline, startDate);
+            LocalDateTime startDate =
+                    dto.startDate() != null
+                            ? dto.startDate()
+                            : tournament.getStartDate();
 
-        tournamentPatchMapper.updateTournament(dto, tournament);
+            validateTournamentDates(registrationDeadline, startDate);
 
-        TournamentDomain updatedTournament =
-                tournamentRepository.save(tournament);
+            tournamentPatchMapper.updateTournament(dto, tournament);
 
-        return tournamentCreateDtoMapper.toUpdateDto(updatedTournament);
-    }
+            TournamentDomain updatedTournament =
+                    tournamentRepository.save(tournament);
+
+            return tournamentCreateDtoMapper.toUpdateDto(updatedTournament);
+        }
+
 
     public List<TournamentResponseDTO> getAllOpenRegistrationTournaments() {
         return tournamentRepository.findByRegistrationDeadlineAfter(LocalDateTime.now())

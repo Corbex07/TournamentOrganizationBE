@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -21,59 +22,51 @@ public class GlobalExceptionHandler {
             LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleValidationErrors(
-            MethodArgumentNotValidException exception)
-    {
-        List<String> errors = exception.getBindingResult()
+    public ResponseEntity<ProblemDetail> handleValidationErrors(
+            MethodArgumentNotValidException ex) {
+
+        List<String> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .toList();
 
-        int status = 400;
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Validation failed."
+        );
 
-        return ResponseEntity
-                .status(status)
-                .body(new ApiMessage(
-                        status,
-                        "Validation failed.",
-                        errors
-                ));
+        problem.setProperty("errors", errors);
+
+        return ResponseEntity.badRequest().body(problem);
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, Object>> handleAccessDenied(
-            AccessDeniedException ex) {
+    @ExceptionHandler(TournamentNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleNotFound(
+            TournamentNotFoundException ex) {
 
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(Map.of(
-                        "status", 403,
-                        "message", "Access denied"
-                ));
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.NOT_FOUND,
+                ex.getMessage()
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(problem);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneral(
+    public ResponseEntity<ProblemDetail> handleGeneral(
             Exception ex) {
 
         LOGGER.error("Unexpected exception occurred", ex);
 
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Internal server error"
+        );
+
         return ResponseEntity.status(
                 HttpStatus.INTERNAL_SERVER_ERROR
-        ).body(Map.of(
-                "status", 500,
-                "message", "Internal server error"
-        ));
-
-
-    }
-
-    @ExceptionHandler(TournamentNotFoundException.class)
-    public ResponseEntity<?> handleNotFound(
-            TournamentNotFoundException ex) {
-
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(ex.getMessage());
+        ).body(problem);
     }
 }

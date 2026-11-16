@@ -1,9 +1,11 @@
 package nl.fontys.tournamentorganization.ServiceTest;
 
+import nl.fontys.tournamentorganization.Api.DTOs.User.AuthResponseDTO;
 import nl.fontys.tournamentorganization.Api.DTOs.User.UserLoginRequestDTO;
 import nl.fontys.tournamentorganization.Api.DTOs.User.UserRegistrationRequestDTO;
 import nl.fontys.tournamentorganization.bll.Domains.TournamentDomain;
 import nl.fontys.tournamentorganization.bll.Domains.UserDomain;
+import nl.fontys.tournamentorganization.bll.services.JwtService;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.UserRepository;
 import nl.fontys.tournamentorganization.bll.services.AuthService;
 import org.junit.jupiter.api.Test;
@@ -32,6 +34,9 @@ public class AuthServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private JwtService jwtService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -42,7 +47,7 @@ public class AuthServiceTest {
     void authenticate_shouldReturnUser_whenCredentialsAreCorrect() {
 
         // Arrange
-        UserLoginRequestDTO requestDTO = new UserLoginRequestDTO("User", "Password123!");
+        UserLoginRequestDTO requestDTO = new UserLoginRequestDTO("User@example.com", "Password123!");
 
         UserDomain user = new UserDomain(
                 "User",
@@ -50,7 +55,7 @@ public class AuthServiceTest {
                 "hashedPassword"
         );
 
-        when(userRepository.findByUsername("User"))
+        when(userRepository.findByEmail("User@example.com"))
                 .thenReturn(Optional.of(user));
 
         when(passwordEncoder.matches(
@@ -94,13 +99,13 @@ public class AuthServiceTest {
     }
 
     @Test
-    void authenticate_shouldThrowUnauthorized_whenUsernameDoesNotExist() {
+    void authenticate_shouldThrowUnauthorized_whenEmailDoesNotExist() {
 
         // Arrange
         UserLoginRequestDTO requestDTO =
-                new UserLoginRequestDTO("UnknownUser", "Password123!");
+                new UserLoginRequestDTO("UnknownEmail", "Password123!");
 
-        when(userRepository.findByUsername("UnknownUser"))
+        when(userRepository.findByEmail("UnknownEmail"))
                 .thenReturn(Optional.empty());
 
         // Act & Assert
@@ -201,6 +206,43 @@ public class AuthServiceTest {
 
         verify(userRepository, never())
                 .save(any(UserDomain.class));
+    }
+
+    @Test
+    void login_WithValidCredentials_ReturnsAuthResponse() {
+        // Arrange
+        UserLoginRequestDTO request = new UserLoginRequestDTO(
+                "test@example.com",
+                "password123"
+        );
+
+        UserDomain user = new UserDomain(
+                "testuser",
+                "test@example.com",
+                "hashedPassword"
+        );
+
+        String expectedToken = "mock-jwt-token";
+
+        when(userRepository.findByEmail(request.email()))
+                .thenReturn(Optional.of(user));
+
+        when(passwordEncoder.matches(
+                request.password(),
+                user.getPasswordHash()
+        )).thenReturn(true);
+
+        when(jwtService.generateToken(user))
+                .thenReturn(expectedToken);
+
+        // Act
+        AuthResponseDTO response = authService.login(request);
+
+        // Assert
+        assertEquals(expectedToken, response.accessToken());
+        assertEquals("Bearer", response.tokenType());
+
+        verify(jwtService).generateToken(user);
     }
 
 
