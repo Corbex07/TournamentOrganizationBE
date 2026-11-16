@@ -1,4 +1,4 @@
-package nl.fontys.tournamentorganization.ServiceTest;
+package nl.fontys.tournamentorganization.ServiceTest.Tournament;
 
 import nl.fontys.tournamentorganization.Api.DTOs.Tournament.CreateTournamentRequestDTO;
 import nl.fontys.tournamentorganization.Api.DTOs.Tournament.TournamentResponseDTO;
@@ -6,10 +6,9 @@ import nl.fontys.tournamentorganization.Api.DTOs.Tournament.UpdateTournamentRequ
 import nl.fontys.tournamentorganization.Api.Mappers.TournamentPatchMapper;
 import nl.fontys.tournamentorganization.bll.Domains.TournamentDomain;
 import nl.fontys.tournamentorganization.bll.Domains.UserDomain;
-import nl.fontys.tournamentorganization.Api.Mappers.TournamentCreateDtoMapper;
+import nl.fontys.tournamentorganization.Api.Mappers.TournamentDtoMapper;
 import nl.fontys.tournamentorganization.Api.Exceptions.TournamentNotFoundException;
 import nl.fontys.tournamentorganization.bll.enums.TournamentStatus;
-import nl.fontys.tournamentorganization.dal.Entities.Tournament;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.TournamentRepository;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.UserRepository;
 import nl.fontys.tournamentorganization.bll.services.TournamentService;
@@ -35,11 +34,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class TournamentServiceTest {
 
-    private TournamentPatchMapper tournamentPatchMapper;
-
-    @Mock
-    private TournamentCreateDtoMapper tournamentCreateDtoMapper;
-
     @Mock
     private TournamentRepository tournamentRepository;
 
@@ -54,17 +48,16 @@ class TournamentServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        tournamentPatchMapper =
-                Mappers.getMapper(TournamentPatchMapper.class);
+        TournamentPatchMapper tournamentPatchMapper = Mappers.getMapper(TournamentPatchMapper.class);
 
 
-        TournamentCreateDtoMapper tournamentCreateDtoMapper =
-                new TournamentCreateDtoMapper();
+        TournamentDtoMapper tournamentDtoMapper =
+                new TournamentDtoMapper();
 
         tournamentService = new TournamentService(
                 userRepository,
                 tournamentRepository,
-                tournamentCreateDtoMapper,
+                tournamentDtoMapper,
                 tournamentPatchMapper
         );
     }

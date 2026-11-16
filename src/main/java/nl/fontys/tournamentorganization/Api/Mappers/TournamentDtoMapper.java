@@ -8,7 +8,7 @@ import nl.fontys.tournamentorganization.bll.Domains.UserDomain;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TournamentCreateDtoMapper {
+public class TournamentDtoMapper {
 
     public TournamentResponseDTO toResponseDto(TournamentDomain tournament) {
         return new TournamentResponseDTO(

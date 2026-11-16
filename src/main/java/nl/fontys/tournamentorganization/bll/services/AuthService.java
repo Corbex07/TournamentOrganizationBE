@@ -58,7 +58,7 @@ public class AuthService {
                 .findByEmail(requestDTO.email())
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.UNAUTHORIZED,
-                        "Invalid username or password"
+                        "Invalid email or password"
                 ));
 
         if (!passwordEncoder.matches(
@@ -67,7 +67,7 @@ public class AuthService {
 
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,
-                    "Invalid username or password"
+                    "Invalid email or password"
             );
         }
 

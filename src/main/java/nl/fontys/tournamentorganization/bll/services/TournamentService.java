@@ -7,7 +7,7 @@ import nl.fontys.tournamentorganization.Api.Exceptions.TournamentNotFoundExcepti
 import nl.fontys.tournamentorganization.Api.Mappers.TournamentPatchMapper;
 import nl.fontys.tournamentorganization.bll.Domains.TournamentDomain;
 import nl.fontys.tournamentorganization.bll.Domains.UserDomain;
-import nl.fontys.tournamentorganization.Api.Mappers.TournamentCreateDtoMapper;
+import nl.fontys.tournamentorganization.Api.Mappers.TournamentDtoMapper;
 import nl.fontys.tournamentorganization.bll.enums.TournamentStatus;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.TournamentRepository;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.UserRepository;
@@ -27,23 +27,23 @@ public class TournamentService {
 
     private final UserRepository userRepository;
 
-    private final TournamentCreateDtoMapper tournamentCreateDtoMapper;
+    private final TournamentDtoMapper tournamentDtoMapper;
 
 
     public TournamentService(UserRepository userRepository,
                              TournamentRepository tournamentRepository,
-                             TournamentCreateDtoMapper dtoMapper,
+                             TournamentDtoMapper dtoMapper,
                              TournamentPatchMapper tournamentPatchMapper) {
         this.tournamentPatchMapper = tournamentPatchMapper;
         this.userRepository = userRepository;
         this.tournamentRepository = tournamentRepository;
-        this.tournamentCreateDtoMapper = dtoMapper;
+        this.tournamentDtoMapper = dtoMapper;
     }
 
     public List<TournamentResponseDTO> getAllTournaments() {
         return tournamentRepository.findAll()
                 .stream()
-                .map(tournamentCreateDtoMapper::toResponseDto)
+                .map(tournamentDtoMapper::toResponseDto)
                 .toList();
     }
 
@@ -56,7 +56,7 @@ public class TournamentService {
 
     public TournamentResponseDTO getTournamentResponseById(Long id) {
 
-        return tournamentCreateDtoMapper.toResponseDto(getTournamentById(id));
+        return tournamentDtoMapper.toResponseDto(getTournamentById(id));
 
         }
 
@@ -73,7 +73,7 @@ public class TournamentService {
 
 
         TournamentDomain tournament =
-                tournamentCreateDtoMapper.fromCreateDto(dto, organiser);
+                tournamentDtoMapper.fromCreateDto(dto, organiser);
 
         tournament.setTournamentStatus(TournamentStatus.Open);
 
@@ -119,14 +119,14 @@ public class TournamentService {
             TournamentDomain updatedTournament =
                     tournamentRepository.save(tournament);
 
-            return tournamentCreateDtoMapper.toUpdateDto(updatedTournament);
+            return tournamentDtoMapper.toUpdateDto(updatedTournament);
         }
 
 
     public List<TournamentResponseDTO> getAllOpenRegistrationTournaments() {
         return tournamentRepository.findByRegistrationDeadlineAfter(LocalDateTime.now())
                 .stream()
-                .map(tournamentCreateDtoMapper::toResponseDto)
+                .map(tournamentDtoMapper::toResponseDto)
                 .toList();
     }
 

@@ -1,9 +1,8 @@
-package nl.fontys.tournamentorganization.ServiceTest;
+package nl.fontys.tournamentorganization.ServiceTest.Auth;
 
 import nl.fontys.tournamentorganization.Api.DTOs.User.AuthResponseDTO;
 import nl.fontys.tournamentorganization.Api.DTOs.User.UserLoginRequestDTO;
 import nl.fontys.tournamentorganization.Api.DTOs.User.UserRegistrationRequestDTO;
-import nl.fontys.tournamentorganization.bll.Domains.TournamentDomain;
 import nl.fontys.tournamentorganization.bll.Domains.UserDomain;
 import nl.fontys.tournamentorganization.bll.services.JwtService;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.UserRepository;
