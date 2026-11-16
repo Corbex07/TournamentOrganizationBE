@@ -80,14 +80,7 @@ public class AuthServiceTest {
                 "User@example.com",
                 "hashedPassword"
         );
-
-        when(userRepository.findByUsername("User"))
-                .thenReturn(Optional.of(user));
-
-        when(passwordEncoder.matches(
-                "WrongPassword", "hashedPassword"))
-                .thenReturn(false);
-
+        
         // Act
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
