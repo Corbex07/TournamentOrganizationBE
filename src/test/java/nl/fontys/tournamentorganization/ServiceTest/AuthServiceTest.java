@@ -80,7 +80,7 @@ public class AuthServiceTest {
                 "User@example.com",
                 "hashedPassword"
         );
-        
+
         // Act
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
