@@ -65,6 +65,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
       SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/testdb
       SPRING_DATASOURCE_USERNAME: test
       SPRING_DATASOURCE_PASSWORD: test
