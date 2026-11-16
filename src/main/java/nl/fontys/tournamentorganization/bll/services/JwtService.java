@@ -26,10 +26,10 @@ public class JwtService {
 
         JwtClaimsSet claimsSet = JwtClaimsSet.builder()
                 .subject(String.valueOf(userDomain.getId()))
-                .issuer("tournament-organization-api")
+                    .issuer("tournament-organization-api")
                 .audience(List.of("tournament-api"))
                 .issuedAt(now)
-                .expiresAt(now.plus(2, ChronoUnit.MINUTES)) //should be lower after refresh tokens are a thing
+                .expiresAt(now.plus(24, ChronoUnit.HOURS)) //should be lower after refresh tokens are a thing
                 .build();
 
         JwsHeader header = JwsHeader.with(

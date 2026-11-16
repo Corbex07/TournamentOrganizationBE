@@ -6,7 +6,11 @@ import nl.fontys.tournamentorganization.Api.DTOs.Tournament.UpdateTournamentRequ
 import nl.fontys.tournamentorganization.bll.services.TournamentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 
 @RestController
@@ -36,9 +40,11 @@ public class TournamentController {
 
     @PostMapping
     public ResponseEntity<?> createTournament(
-            @Valid @RequestBody CreateTournamentRequestDTO request) {
+            @Valid @RequestBody CreateTournamentRequestDTO request,
+            @AuthenticationPrincipal Jwt jwt) {
 
-        tournamentService.createTournament(request);
+        Long organiserId = Long.valueOf(Objects.requireNonNull(jwt.getSubject()));
+        tournamentService.createTournament(request, organiserId);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -49,9 +55,12 @@ public class TournamentController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTournament(@PathVariable Long id) {
+    public ResponseEntity<?> deleteTournament(@PathVariable Long id,
+                                              @AuthenticationPrincipal Jwt jwt) {
 
-        tournamentService.deleteTournament(id);
+        Long organiserId = Long.valueOf(Objects.requireNonNull(jwt.getSubject()));
+
+        tournamentService.deleteTournament(id, organiserId);
 
         return ResponseEntity.noContent().build();
     }
@@ -59,9 +68,12 @@ public class TournamentController {
     @PatchMapping("/{id}")
     public ResponseEntity<?> updateTournament(
             @PathVariable Long id,
-            @Valid @RequestBody UpdateTournamentRequestDTO updateTournamentRequestDTO) {
+            @Valid @RequestBody UpdateTournamentRequestDTO updateTournamentRequestDTO,
+            @AuthenticationPrincipal Jwt jwt) {
 
-        tournamentService.updateTournament(id, updateTournamentRequestDTO);
+        Long organiserId = Long.valueOf(Objects.requireNonNull(jwt.getSubject()));
+
+        tournamentService.updateTournament(id, updateTournamentRequestDTO, organiserId );
 
         return ResponseEntity.noContent().build();
     }
