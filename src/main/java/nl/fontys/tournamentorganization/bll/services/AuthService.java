@@ -1,14 +1,19 @@
 package nl.fontys.tournamentorganization.bll.services;
 
+import jakarta.servlet.http.Cookie;
 import nl.fontys.tournamentorganization.Api.DTOs.User.AuthResponseDTO;
 import nl.fontys.tournamentorganization.Api.DTOs.User.UserLoginRequestDTO;
 import nl.fontys.tournamentorganization.Api.DTOs.User.UserRegistrationRequestDTO;
 import nl.fontys.tournamentorganization.bll.Domains.UserDomain;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.UserRepository;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.time.Duration;
 
 @Service
 public class AuthService {
@@ -79,7 +84,17 @@ public class AuthService {
 
         String token = jwtService.generateToken(userDomain);
 
-        return new AuthResponseDTO(token, "Bearer");
+        ResponseCookie cookie =  ResponseCookie
+                .from("accessToken", token)
+                .domain("localhost")
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(Duration.ofHours(24))
+                .build();
+
+        return new AuthResponseDTO(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
 

@@ -26,6 +26,12 @@ public class SecurityConfig {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
+    private final CookieBearerTokenResolver cookieBearerTokenResolver;
+
+    public SecurityConfig(CookieBearerTokenResolver cookieBearerTokenResolver) {
+        this.cookieBearerTokenResolver = cookieBearerTokenResolver;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http) throws Exception {
@@ -52,6 +58,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
+                        .bearerTokenResolver(cookieBearerTokenResolver)
                         .jwt(Customizer.withDefaults())
                 )
                 .exceptionHandling(ex -> ex
