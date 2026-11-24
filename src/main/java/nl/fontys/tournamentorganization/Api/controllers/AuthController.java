@@ -5,7 +5,6 @@ import nl.fontys.tournamentorganization.Api.DTOs.User.AuthResponseDTO;
 import nl.fontys.tournamentorganization.Api.DTOs.User.UserLoginRequestDTO;
 import nl.fontys.tournamentorganization.Api.DTOs.User.UserRegistrationRequestDTO;
 import nl.fontys.tournamentorganization.bll.services.AuthService;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

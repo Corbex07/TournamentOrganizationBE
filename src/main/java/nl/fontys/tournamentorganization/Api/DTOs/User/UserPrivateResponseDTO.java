@@ -4,4 +4,4 @@ public record UserPrivateResponseDTO(
         Long id,
         String username,
         String email
-) {}
+) { }

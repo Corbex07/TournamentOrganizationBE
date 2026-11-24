@@ -1,6 +1,5 @@
 package nl.fontys.tournamentorganization.bll.services;
 
-import jakarta.servlet.http.Cookie;
 import nl.fontys.tournamentorganization.Api.DTOs.User.AuthResponseDTO;
 import nl.fontys.tournamentorganization.Api.DTOs.User.UserLoginRequestDTO;
 import nl.fontys.tournamentorganization.Api.DTOs.User.UserRegistrationRequestDTO;

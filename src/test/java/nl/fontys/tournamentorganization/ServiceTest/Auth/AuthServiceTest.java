@@ -14,9 +14,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Duration;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -216,6 +218,17 @@ public class AuthServiceTest {
 
         String expectedToken = "mock-jwt-token";
 
+        ResponseCookie cookie =  ResponseCookie
+                .from("accessToken", "mock-jwt-token")
+                .domain("localhost")
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(Duration.ofHours(24))
+                .build();
+
+
         when(userRepository.findByEmail(request.email()))
                 .thenReturn(Optional.of(user));
 
@@ -231,8 +244,8 @@ public class AuthServiceTest {
         AuthResponseDTO response = authService.login(request);
 
         // Assert
-        assertEquals(expectedToken, response.accessToken());
-        assertEquals("Bearer", response.tokenType());
+        assertEquals(cookie.toString(), response.cookie());
+        assertEquals("Set-Cookie", response.httpHeader());
 
         verify(jwtService).generateToken(user);
     }

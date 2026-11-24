@@ -6,7 +6,6 @@ import nl.fontys.tournamentorganization.Api.DTOs.User.UserUpdateRequestDTO;
 import nl.fontys.tournamentorganization.Api.Exceptions.UserNotFoundException;
 import nl.fontys.tournamentorganization.Api.Mappers.UserDtoMapper;
 import nl.fontys.tournamentorganization.bll.Domains.UserDomain;
-import nl.fontys.tournamentorganization.dal.Mappers.UserMapper;
 import nl.fontys.tournamentorganization.dal.Repositories.Interfaces.UserRepository;
 import org.springframework.stereotype.Service;
 
